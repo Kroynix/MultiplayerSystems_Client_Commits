@@ -102,14 +102,14 @@ public class NetworkedServer : MonoBehaviour
             if(isUnique) 
             {
                 playerAccounts.AddLast(new PlayerAccount(n,p));
-                SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + "Account Created", id);
+                SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.AccountCreated + "," + "Account Created", id);
                 SavePlayerAccounts();
                 foreach(PlayerAccount pa in playerAccounts)
                     Debug.Log(pa);
             }
             else
             {
-                SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + "This Account already Exists", id);
+                SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.FailureNameInUse + "," + "This Account already Exists", id);
             }
         }
 
@@ -127,12 +127,12 @@ public class NetworkedServer : MonoBehaviour
                 {
                     if(pa.Password == p)
                     {
-                        SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + "You have Successfully Logged In", id);
+                        SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.Success + "," + "You have Successfully Logged In", id);
                         //responseHasBeenSent = true;
                     }
                     else
                     {
-                        SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + "Incorrect Password", id);
+                        SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.FailureIncorrectPassword + "," + "Incorrect Password", id);
                         //responseHasBeenSent = true;
                     }
                     hasBeenFound = true;
@@ -142,10 +142,15 @@ public class NetworkedServer : MonoBehaviour
             }
             if(!hasBeenFound)
             {
-                SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + "Failure name not found", id);
+                SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.FailureNameNotFound + "," + "Failure name not found", id);
             }
 
         }
+        else
+        {
+
+        }
+
 
     }
 
@@ -181,6 +186,14 @@ public class NetworkedServer : MonoBehaviour
 
 }
 
+
+public class GameSession
+{
+
+}
+
+
+
 public class PlayerAccount
 {
     public string Name, Password;
@@ -209,6 +222,7 @@ public static class LoginResponses{
     public const int FailureNameInUse = 2;
     public const int FailureNameNotFound = 3;
     public const int FailureIncorrectPassword = 4;
+    public const int AccountCreated = 5;
 }
 
 
