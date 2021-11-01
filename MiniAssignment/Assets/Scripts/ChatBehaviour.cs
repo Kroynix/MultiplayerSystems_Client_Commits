@@ -9,22 +9,25 @@ public class ChatBehaviour : MonoBehaviour
     public InputField chat;
     public TMP_Text chatBox;
 
-    
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void Update()
     {
         if(chat.text != "" && Input.GetKeyDown(KeyCode.Return))
         {
-            chatBox.text += "\n" + chat.text;
+            FindObjectOfType<NetworkedClient>().SendMessageToHost(ChatStates.ClientToServer + "," + FindObjectOfType<GameSystemManager>().name + 
+            "," + chat.text);
             chat.text = "";
             chat.ActivateInputField();
+
         }
+    }
+
+    public void AddTextToChat(string text)
+    {
+        chatBox.text += "\n" + text;
+
+
     }
 }

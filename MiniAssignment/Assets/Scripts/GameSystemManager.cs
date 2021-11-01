@@ -19,6 +19,9 @@ public class GameSystemManager : MonoBehaviour
     // Login Menu Messages 
     GameObject invalidPass,invalidUser,invalidUserExist,accCreated, invalidIn;
 
+
+    public string name;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -76,14 +79,7 @@ public class GameSystemManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.S))
             networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.test + "," + "Hello from client");
-
-        if (Input.GetKeyDown(KeyCode.A))
-            ChangeGameState(GameStates.Login);
-
-        if (Input.GetKeyDown(KeyCode.B))
-            ChangeGameState(GameStates.MainMenu);
-
-
+        
     }
 
 
@@ -154,9 +150,6 @@ public class GameSystemManager : MonoBehaviour
 
 
 
-
-
-
     #region ErrorMessages
 
     public void invalidPassword()
@@ -211,6 +204,7 @@ public static class LoginResponses
     public const int FailureNameNotFound = 3;
     public const int FailureIncorrectPassword = 4;
     public const int AccountCreated = 5;
+    public const int SendUsername = 6;
 }
 
 
@@ -222,4 +216,10 @@ public static class GameStates
     public const int PlayingTicTacToe = 4;
     public const int Loading = 5;
 
+}
+
+public static class ChatStates
+{
+    public const int ClientToServer = 7;
+    public const int ServerToClient = 8;
 }

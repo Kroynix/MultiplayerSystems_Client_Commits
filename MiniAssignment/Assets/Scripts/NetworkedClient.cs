@@ -88,7 +88,7 @@ public class NetworkedClient : MonoBehaviour
             hostID = NetworkTransport.AddHost(topology, 0);
             Debug.Log("Socket open.  Host ID = " + hostID);
 
-            connectionID = NetworkTransport.Connect(hostID, "192.168.50.210", socketPort, 0, out error); // server is local on network
+            connectionID = NetworkTransport.Connect(hostID, "99.230.245.190", socketPort, 0, out error); // server is local on network
 
             if (error == 0)
             {
@@ -119,6 +119,8 @@ public class NetworkedClient : MonoBehaviour
 
         int signifier = int.Parse(csv[0]);
 
+        Debug.Log(signifier);
+
         if(signifier == ServerToClientSignifiers.LoginResponse)
         {
             int loginResultSignifier = int.Parse(csv[1]);
@@ -126,6 +128,7 @@ public class NetworkedClient : MonoBehaviour
             if (loginResultSignifier == LoginResponses.Success)
             {
                 gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.MainMenu);
+                FindObjectOfType<AudioController>().Play("Success");
             }
             else if (loginResultSignifier == LoginResponses.FailureNameInUse)
             {
@@ -147,7 +150,20 @@ public class NetworkedClient : MonoBehaviour
                 gameSystemManager.GetComponent<GameSystemManager>().accountCreate();
                 FindObjectOfType<AudioController>().Play("Error");
             }
+
+            if(loginResultSignifier == LoginResponses.SendUsername)
+            {
+                string n = csv[2];
+                gameSystemManager.GetComponent<GameSystemManager>().name = n;
+            }
             
+        }
+
+        else if (signifier == ChatStates.ServerToClient)
+        {
+            string name = csv[1];
+            string message = csv[2];
+            FindObjectOfType<ChatBehaviour>().AddTextToChat(name + ": " + message);
         }
 
 
@@ -164,7 +180,7 @@ public class NetworkedClient : MonoBehaviour
     IEnumerator LoadGame()
     {
         yield return new WaitForSeconds(3);
-        FindObjectOfType<AudioController>().Play("Success");
+        FindObjectOfType<AudioController>().Play("Success"); 
         gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.Login);
     }
 
