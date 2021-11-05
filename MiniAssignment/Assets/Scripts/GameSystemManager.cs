@@ -31,7 +31,21 @@ public class GameSystemManager : MonoBehaviour
         // Get Reference to all needed Game Objects
         foreach (GameObject go in allObjects)
         {
-            if (go.name == "inputFieldUserName")
+            // Network Client
+            if (go.name == "NetworkedClient")
+                networkedClient = go;
+
+            // States
+            else if (go.name == "LoginSystem")
+                LoginSystem = go;
+            else if (go.name == "Loading")
+                Loading = go;
+            else if (go.name == "ChatRoomSelection")
+                ChatRoom = go;
+
+
+            // Game Objects - Login System
+            else if (go.name == "inputFieldUserName")
                 inputFieldUserName = go;
             else if (go.name == "inputFieldPassword")
                 inputFieldPassword = go;
@@ -39,10 +53,6 @@ public class GameSystemManager : MonoBehaviour
                 buttonSubmit = go;
             else if (go.name == "toggleCreate")
                 toggleCreate = go;
-            else if (go.name == "NetworkedClient")
-                networkedClient = go;
-            else if (go.name == "LoginSystem")
-                LoginSystem = go;
             else if (go.name == "InvalidPassword")
                 invalidPass = go;
             else if (go.name == "InvalidUsername")
@@ -51,12 +61,9 @@ public class GameSystemManager : MonoBehaviour
                 invalidUserExist = go;
             else if (go.name == "AccountCreated")
                 accCreated = go;
-            else if (go.name == "ChatRoomSelection")
-                ChatRoom = go;
             else if (go.name == "InvalidInput")
                 invalidIn = go;
-            else if (go.name == "Loading")
-                Loading = go;
+
         }
 
 
@@ -146,6 +153,11 @@ public class GameSystemManager : MonoBehaviour
             Loading.SetActive(true);
         }
 
+        else if (newState == GameStates.PlayingTicTacToe)
+        {
+
+        }
+
     }
 
 
@@ -187,7 +199,7 @@ public static class ClientToServerSignifiers
 {
     public const int Login = 1;
     public const int CreateAccount = 2;
-    public const int test = 3;
+    public const int AddToGameSeesion = 3;
 }
 
 public static class ServerToClientSignifiers

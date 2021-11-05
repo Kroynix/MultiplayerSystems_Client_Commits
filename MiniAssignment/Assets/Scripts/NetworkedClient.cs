@@ -177,6 +177,10 @@ public class NetworkedClient : MonoBehaviour
 
 
 
+
+
+
+
     IEnumerator LoadGame()
     {
         yield return new WaitForSeconds(3);
@@ -185,4 +189,10 @@ public class NetworkedClient : MonoBehaviour
     }
 
 
+}
+
+
+public class GameSession
+{
+    
 }
