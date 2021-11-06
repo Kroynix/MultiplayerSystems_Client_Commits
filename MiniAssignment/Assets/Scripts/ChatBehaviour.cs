@@ -8,6 +8,7 @@ public class ChatBehaviour : MonoBehaviour
 {
     public InputField chat;
     public TMP_Text chatBox;
+    public TMP_Text ConnectedUsers;
 
 
 
@@ -28,6 +29,12 @@ public class ChatBehaviour : MonoBehaviour
     {
         chatBox.text += "\n" + text;
 
+    }
+
+    public void AddUserToList(string text)
+    {
+        ConnectedUsers.text += "\n" + text;
 
     }
+
 }

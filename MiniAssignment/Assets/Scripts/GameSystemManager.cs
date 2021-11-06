@@ -14,7 +14,7 @@ public class GameSystemManager : MonoBehaviour
     GameObject networkedClient;
 
     // States
-    GameObject Loading,LoginSystem, ChatRoom;
+    GameObject Loading,LoginSystem, ChatRoom, WaitingMatch;
 
     // Login Menu Messages 
     GameObject invalidPass,invalidUser,invalidUserExist,accCreated, invalidIn;
@@ -42,6 +42,8 @@ public class GameSystemManager : MonoBehaviour
                 Loading = go;
             else if (go.name == "ChatRoomSelection")
                 ChatRoom = go;
+            else if (go.name == "WaitingForMatch")
+                WaitingMatch = go;
 
 
             // Game Objects - Login System
@@ -86,6 +88,7 @@ public class GameSystemManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.S))
             networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.test + "," + "Hello from client");
+            //Debug.Log(System.DateTime.Now);
         
     }
 
@@ -121,6 +124,50 @@ public class GameSystemManager : MonoBehaviour
 
     }
 
+    public void ChangeGameState(int newState)
+    {
+        if(newState == GameStates.Login)
+        {
+            LoginSystem.SetActive(true);
+            ChatRoom.SetActive(false);
+            Loading.SetActive(false);
+            WaitingMatch.SetActive(false);
+        }
+        else if (newState == GameStates.MainMenu)
+        {
+            LoginSystem.SetActive(false);
+            ChatRoom.SetActive(true);
+            Loading.SetActive(false);
+            WaitingMatch.SetActive(false);
+            
+        }
+        else if (newState == GameStates.Loading)
+        {
+            LoginSystem.SetActive(false);
+            ChatRoom.SetActive(false);
+            Loading.SetActive(true);
+            WaitingMatch.SetActive(false);
+        }
+
+        else if (newState == GameStates.WaitingForMatch)
+        {
+            LoginSystem.SetActive(false);
+            ChatRoom.SetActive(false);
+            Loading.SetActive(false);
+            WaitingMatch.SetActive(true);
+        }
+
+    }
+
+
+    public void FindGameButtonPressed()
+    {
+        networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.FindMatch + "");
+    }
+
+
+    #region ErrorMessages
+
     public void ValueChanged()
     {
         invalidPass.SetActive(false);
@@ -130,39 +177,6 @@ public class GameSystemManager : MonoBehaviour
         invalidIn.SetActive(false);
     }
 
-
-    public void ChangeGameState(int newState)
-    {
-        if(newState == GameStates.Login)
-        {
-            LoginSystem.SetActive(true);
-            ChatRoom.SetActive(false);
-            Loading.SetActive(false);
-        }
-        else if (newState == GameStates.MainMenu)
-        {
-            LoginSystem.SetActive(false);
-            ChatRoom.SetActive(true);
-            Loading.SetActive(false);
-            
-        }
-        else if (newState == GameStates.Loading)
-        {
-            LoginSystem.SetActive(false);
-            ChatRoom.SetActive(false);
-            Loading.SetActive(true);
-        }
-
-        else if (newState == GameStates.PlayingTicTacToe)
-        {
-
-        }
-
-    }
-
-
-
-    #region ErrorMessages
 
     public void invalidPassword()
     {
@@ -194,12 +208,15 @@ public class GameSystemManager : MonoBehaviour
 }
 
 
+#region Signifiers
 
 public static class ClientToServerSignifiers
 {
     public const int Login = 1;
     public const int CreateAccount = 2;
-    public const int AddToGameSeesion = 3;
+    public const int FindMatch = 3;
+    public const int AddToGameSeesion = 4;
+    public const int test = 5;
 }
 
 public static class ServerToClientSignifiers
@@ -234,4 +251,7 @@ public static class ChatStates
 {
     public const int ClientToServer = 7;
     public const int ServerToClient = 8;
+    public const int ConnectedUserList = 9;
 }
+
+#endregion Signifiers

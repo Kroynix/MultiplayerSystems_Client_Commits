@@ -17,12 +17,18 @@ public class NetworkedClient : MonoBehaviour
     bool isConnected = false;
     int ourClientID;
 
+
+
+    //List<IDName> idlist;
+
     GameObject gameSystemManager;
 
 
     // Start is called before the first frame update
     void Start()
     {
+        //idlist = new List<IDName>();
+
         GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
 
         foreach (GameObject go in allObjects)
@@ -88,7 +94,7 @@ public class NetworkedClient : MonoBehaviour
             hostID = NetworkTransport.AddHost(topology, 0);
             Debug.Log("Socket open.  Host ID = " + hostID);
 
-            connectionID = NetworkTransport.Connect(hostID, "99.230.245.190", socketPort, 0, out error); // server is local on network
+            connectionID = NetworkTransport.Connect(hostID, "192.168.50.210", socketPort, 0, out error); // server is local on network
 
             if (error == 0)
             {
@@ -165,6 +171,17 @@ public class NetworkedClient : MonoBehaviour
             string message = csv[2];
             FindObjectOfType<ChatBehaviour>().AddTextToChat(name + ": " + message);
         }
+/*
+        else if (signifier == ChatStates.ConnectedUserList)
+        {
+            string name = csv[1];
+            string identifier = csv[2];
+            idlist.Add(new IDName(identifier, name));
+
+            foreach(IDName identity in idlist)
+                FindObjectOfType<ChatBehaviour>().AddUserToList(identity.name + "");
+        }
+*/
 
 
         //ChangeGameState(GameStates.MainMenu);
@@ -190,6 +207,22 @@ public class NetworkedClient : MonoBehaviour
 
 
 }
+
+/*
+public class IDName
+{
+    public string id;
+    public string name;
+
+    public IDName(string identifitier, string Name)
+    {
+        id = identifitier;
+        name = Name;
+    }
+
+}
+*/
+
 
 
 public class GameSession
