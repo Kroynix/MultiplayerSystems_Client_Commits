@@ -14,7 +14,7 @@ public class GameSystemManager : MonoBehaviour
     GameObject networkedClient;
 
     // States
-    GameObject Loading,LoginSystem, ChatRoom, WaitingMatch;
+    GameObject Loading,LoginSystem, ChatRoom, WaitingMatch, InGame;
 
     // Login Menu Messages 
     GameObject invalidPass,invalidUser,invalidUserExist,accCreated, invalidIn;
@@ -44,6 +44,9 @@ public class GameSystemManager : MonoBehaviour
                 ChatRoom = go;
             else if (go.name == "WaitingForMatch")
                 WaitingMatch = go;
+            else if (go.name == "Ingame")
+                InGame = go;
+
 
 
             // Game Objects - Login System
@@ -163,6 +166,8 @@ public class GameSystemManager : MonoBehaviour
     public void FindGameButtonPressed()
     {
         networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.FindMatch + "");
+        ChangeGameState(GameStates.WaitingForMatch);
+
     }
 
 
@@ -215,13 +220,13 @@ public static class ClientToServerSignifiers
     public const int Login = 1;
     public const int CreateAccount = 2;
     public const int FindMatch = 3;
-    public const int AddToGameSeesion = 4;
     public const int test = 5;
 }
 
 public static class ServerToClientSignifiers
 {
     public const int LoginResponse = 1;
+    public const int AddToGameSession = 4;
 
 }
 

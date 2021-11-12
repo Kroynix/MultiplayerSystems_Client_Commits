@@ -80,7 +80,6 @@ public class NetworkedClient : MonoBehaviour
     
     private void Connect()
     {
-
         if (!isConnected)
         {
             Debug.Log("Attempting to create connection");
@@ -171,7 +170,7 @@ public class NetworkedClient : MonoBehaviour
             string message = csv[2];
             FindObjectOfType<ChatBehaviour>().AddTextToChat(name + ": " + message);
         }
-/*
+        /*
         else if (signifier == ChatStates.ConnectedUserList)
         {
             string name = csv[1];
@@ -181,7 +180,13 @@ public class NetworkedClient : MonoBehaviour
             foreach(IDName identity in idlist)
                 FindObjectOfType<ChatBehaviour>().AddUserToList(identity.name + "");
         }
-*/
+        */
+        else if (signifier == ServerToClientSignifiers.AddToGameSession)
+        {
+            Debug.Log("Swapped To GameSession");
+        }
+
+
 
 
         //ChangeGameState(GameStates.MainMenu);
