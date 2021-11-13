@@ -236,7 +236,15 @@ public class NetworkedServer : MonoBehaviour
                 }
             }
 
-            
+            else if (MatchSignifier == GameSignifiers.EndGame)
+            {
+                GameSession gs = FindGameSessionWithPlayerID(id);
+                if(gs != null) 
+                {
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.EndGame, gs.playerID1);
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.EndGame, gs.playerID2);
+                }
+            }
         }
 
     }
@@ -352,6 +360,7 @@ public static class GameSignifiers
     public const int SendMoveToServer = 2;
     public const int AddToGameSession = 3;
     public const int SendMoveToClients = 4;
+    public const int EndGame = 5;
 }
 
 
