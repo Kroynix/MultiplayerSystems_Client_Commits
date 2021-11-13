@@ -24,7 +24,6 @@ public class Box : MonoBehaviour
     {
         isMarked = true;
         this.mark = mark;
-
         spriteRend.sprite = sprite;
 
         GetComponent<CircleCollider2D>().enabled = false;

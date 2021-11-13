@@ -18,9 +18,7 @@ public class GameSystemManager : MonoBehaviour
 
     // Login Menu Messages 
     GameObject invalidPass,invalidUser,invalidUserExist,accCreated, invalidIn;
-
-
-
+    public string name;
 
     // Start is called before the first frame update
     void Start()
@@ -245,6 +243,7 @@ public static class GameSignifiers
     public const int AddToGameSession = 3;
     public const int SendMoveToClients = 4;
     public const int EndGame = 5;
+    public const int ResetGame = 6;
 }
 
 

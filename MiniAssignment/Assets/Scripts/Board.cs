@@ -16,11 +16,11 @@ public class Board : MonoBehaviour
 
     public Mark[] marks;
     private Camera cam;
-    private Mark currentMark;
     public bool canPlay;
     //private LineRenderer lineRenderer;
-    private int marksCount = 0 ;
 
+
+    public int marksCount = 0;
 
     // Finding Box by Index
     public int Index;
@@ -28,7 +28,7 @@ public class Board : MonoBehaviour
     private Box targetBox;
 
     // Game Objects
-    GameObject xwin, owin;
+    GameObject xwin, owin, tie;
 
     // Start is called before the first frame update
     void Start()
@@ -38,8 +38,6 @@ public class Board : MonoBehaviour
 
         //lineRenderer = GetComponent<LineRenderer> ();
         //lineRenderer.enabled = false;
-
-        currentMark = Mark.O;
         marks = new Mark[9];
         canPlay = true;
 
@@ -54,12 +52,13 @@ public class Board : MonoBehaviour
                 xwin = go;
             else if (go.name == "Owin")
                 owin = go;
+            else if (go.name == "tie")
+                tie = go;
         }
 
 
 
     }
-
 
     // Update is called once per frame
     void Update()
@@ -79,11 +78,13 @@ public class Board : MonoBehaviour
                     HitBox (hit.GetComponent <Box>(), Mark.O);
                     FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.SendMoveToServer + "," + hit.GetComponent<Box>().index);
                     Debug.Log(ClientToServerSignifiers.Match + "," + GameSignifiers.SendMoveToServer + "," + hit.GetComponent<Box>().index);
-                    //canPlay = false;
+                    canPlay = false;
                     
                 }
             }
         }
+
+        Debug.Log(marksCount);
     }
 
     public void HitBox (Box box, Mark mark) 
@@ -93,15 +94,22 @@ public class Board : MonoBehaviour
             marks[box.index] = mark;
 
             box.SetMarked(GetSprite(mark), mark);
+            marksCount++;
+
             // Check for winner
             bool won = CheckIfWin(mark);
-
             if(won)
             {
                 FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.EndGame);
                 displayWinner(mark);
                 canPlay = false;
                 return;
+            }
+
+            if (marksCount == 9)
+            {
+                displayTie();
+                FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.EndGame);
             }
         }
 
@@ -113,6 +121,21 @@ public class Board : MonoBehaviour
         canPlay = false;
 
     }
+
+    public void RestartGame()
+    {
+        foreach(Box box in boxes)
+        {
+            box.ResetBox();
+        }
+        FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.ResetGame);
+    }
+
+    private void displayTie()
+    {
+        tie.SetActive(true);
+    }
+
 
 
     private void displayWinner(Mark mark)
@@ -126,7 +149,6 @@ public class Board : MonoBehaviour
         {
             owin.SetActive(true);
         }
-        
     }
 
 

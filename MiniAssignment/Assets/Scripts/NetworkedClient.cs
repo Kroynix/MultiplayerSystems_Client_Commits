@@ -171,9 +171,6 @@ public class NetworkedClient : MonoBehaviour
             FindObjectOfType<ChatBehaviour>().AddTextToChat(name + ": " + message);
         }
 
-
-
-
         // Match
         if (signifier == ServerToClientSignifiers.MatchResponse)
         {
@@ -181,7 +178,14 @@ public class NetworkedClient : MonoBehaviour
             int MatchSignifier = int.Parse(csv[1]);
             if (MatchSignifier == GameSignifiers.AddToGameSession)
             {
+                int turnOrder = int.Parse(csv[2]);
                 gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.ToGame);
+
+                if (turnOrder == 1)
+                    FindObjectOfType<Board>().canPlay = true;
+                else if (turnOrder == 0)
+                    FindObjectOfType<Board>().canPlay = false;
+
             }
 
             else if (MatchSignifier == GameSignifiers.SendMoveToClients)
@@ -194,6 +198,18 @@ public class NetworkedClient : MonoBehaviour
             else if (MatchSignifier == GameSignifiers.EndGame)
             {
                 FindObjectOfType<Board>().RemoteEndGame();
+            }
+
+            else if (MatchSignifier == GameSignifiers.ResetGame)
+            {
+                int turnOrder = int.Parse(csv[2]);
+                if (turnOrder == 1)
+                    FindObjectOfType<Board>().canPlay = true;
+                else if (turnOrder == 0)
+                    FindObjectOfType<Board>().canPlay = false;
+
+                    
+                FindObjectOfType<Board>().RestartGame();
             }
         }
 

@@ -20,6 +20,7 @@ public class ChatBehaviour : MonoBehaviour
             "," + chat.text);
             chat.text = "";
             chat.ActivateInputField();
+            Debug.Log(FindObjectOfType<GameSystemManager>().name);
 
         }
     }
