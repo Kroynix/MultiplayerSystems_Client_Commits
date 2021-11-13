@@ -20,6 +20,8 @@ public class GameSystemManager : MonoBehaviour
     GameObject invalidPass,invalidUser,invalidUserExist,accCreated, invalidIn;
 
 
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -65,6 +67,10 @@ public class GameSystemManager : MonoBehaviour
                 accCreated = go;
             else if (go.name == "InvalidInput")
                 invalidIn = go;
+
+
+            
+
         }
 
 
@@ -165,7 +171,7 @@ public class GameSystemManager : MonoBehaviour
 
     public void FindGameButtonPressed()
     {
-        networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.FindMatch + "");
+        networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.FindMatch);
         ChangeGameState(GameStates.WaitingForMatch);
 
     }
@@ -215,20 +221,34 @@ public class GameSystemManager : MonoBehaviour
 
 #region Signifiers
 
+// Front Signifiers
 public static class ClientToServerSignifiers
 {
     public const int Login = 1;
     public const int CreateAccount = 2;
-    public const int FindMatch = 3;
-    public const int SendMoveToServer = 5;
+    public const int Match = 3;
+
 }
 
 public static class ServerToClientSignifiers
 {
     public const int LoginResponse = 1;
-    public const int AddToGameSession = 4;
-    public const int SendMoveToClients = 6;
+    public const int MatchResponse = 4;
+
 }
+
+
+public static class GameSignifiers
+{
+    public const int FindMatch = 1;
+    public const int SendMoveToServer = 2;
+    public const int AddToGameSession = 3;
+    public const int SendMoveToClients = 4;
+}
+
+
+
+
 
 
 public static class LoginResponses

@@ -6,23 +6,20 @@ public class Board : MonoBehaviour
 {
 
 
-   [Header ("Input Settings : ")]
-   [SerializeField] private LayerMask boxesLayerMask ;
-   [SerializeField] private float touchRadius ;
+    [Header ("Input Settings : ")]
+    [SerializeField] private LayerMask boxesLayerMask ;
+    [SerializeField] private float touchRadius ;
 
-   [Header ("Mark Sprites : ")]
-   [SerializeField] private Sprite spriteX ;
-   [SerializeField] private Sprite spriteO ;
+    [Header ("Mark Sprites : ")]
+    [SerializeField] private Sprite spriteX ;
+    [SerializeField] private Sprite spriteO ;
 
-    public Mark[] marks ;
-
-
-
-   private Camera cam;
-   private Mark currentMark;
-   private bool canPlay;
-   //private LineRenderer lineRenderer;
-   private int marksCount = 0 ;
+    public Mark[] marks;
+    private Camera cam;
+    private Mark currentMark;
+    public bool canPlay;
+    //private LineRenderer lineRenderer;
+    private int marksCount = 0 ;
 
 
     // Finding Box by Index
@@ -30,21 +27,38 @@ public class Board : MonoBehaviour
     private Box[] boxes;
     private Box targetBox;
 
+    // Game Objects
+    GameObject xwin, owin;
+
     // Start is called before the first frame update
     void Start()
     {
         boxes = FindObjectsOfType<Box>();
+        cam = Camera.main;
 
-      cam = Camera.main;
+        //lineRenderer = GetComponent<LineRenderer> ();
+        //lineRenderer.enabled = false;
 
-      //lineRenderer = GetComponent<LineRenderer> ();
-      //lineRenderer.enabled = false;
+        currentMark = Mark.O;
+        marks = new Mark[9];
+        canPlay = true;
 
-      currentMark = Mark.X;
 
-      marks = new Mark[9];
 
-      canPlay = true;
+        GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+
+
+        // Get Reference to all needed Game Objects
+        foreach (GameObject go in allObjects)
+        {
+            // Game Objects - Gameplay
+            if (go.name == "Xwin")
+                xwin = go;
+            else if (go.name == "Owin")
+                owin = go;
+        }
+
+
 
     }
 
@@ -52,80 +66,89 @@ public class Board : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.S))
-            HitBox(FindBox(Index));
-        //Debug.Log(targetBox.name);
 
-        if (canPlay && Input.GetMouseButtonUp (0)) {
+        if (canPlay && Input.GetMouseButtonUp (0)) 
+        {
             Vector2 touchPosition = cam.ScreenToWorldPoint (Input.mousePosition);
 
-        Collider2D hit = Physics2D.OverlapCircle (touchPosition, touchRadius, boxesLayerMask);
+            Collider2D hit = Physics2D.OverlapCircle (touchPosition, touchRadius, boxesLayerMask);
 
 
-        if(canPlay)
-            if (hit) 
-                FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.SendMoveToServer + "," + hit.GetComponent<Box>().index);
-
-
-        //Debug.Log(hit.GetComponent<Box>().index);
-        // Use this if we we're trying to set it, internally here.
-        // But for this we are gonna send which BoxIndex we clicked on to the server 
-        // Send it back to both players and Find the box by the Index then call
-        // HitBox
-        //HitBox (hit.GetComponent <Box>());
-      }
-
+            if(canPlay)
+            {
+                if (hit) 
+                {
+                    HitBox (hit.GetComponent <Box>(), Mark.O);
+                    FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.SendMoveToServer + "," + hit.GetComponent<Box>().index);
+                    Debug.Log(ClientToServerSignifiers.Match + "," + GameSignifiers.SendMoveToServer + "," + hit.GetComponent<Box>().index);
+                    //canPlay = false;
+                    
+                }
+            }
+        }
     }
 
-    void HitBox (Box box) 
+    public void HitBox (Box box, Mark mark) 
     {
         if(!box.isMarked)
         {
-            marks[box.index] = currentMark;
+            marks[box.index] = mark;
 
-            box.SetMarked(GetSprite(), currentMark);
+            box.SetMarked(GetSprite(mark), mark);
             // Check for winner
-            bool won = CheckIfWin();
+            bool won = CheckIfWin(mark);
 
             if(won)
             {
-                Debug.Log(currentMark.ToString() + "Wins.");
+                displayWinner(mark);
                 canPlay = false;
                 return;
             }
-            SwitchPlayer();
         }
 
     }
 
-    private void SwitchPlayer()
+
+
+    private void displayWinner(Mark mark)
     {
-        currentMark = (currentMark == Mark.X) ? Mark.O : Mark.X;
+
+        if(mark == Mark.X)
+        {
+            xwin.SetActive(true);
+        }
+        else
+        {
+            owin.SetActive(true);
+        }
+        
     }
 
-    private bool CheckIfWin () 
+
+
+    private bool CheckIfWin (Mark mark) 
     {
         return
-        AreBoxesMatched (0, 1, 2) || AreBoxesMatched (3, 4, 5) || AreBoxesMatched (6, 7, 8) ||
-        AreBoxesMatched (0, 3, 6) || AreBoxesMatched (1, 4, 7) || AreBoxesMatched (2, 5, 8) ||
-        AreBoxesMatched (0, 4, 8) || AreBoxesMatched (2, 4, 6);
+        AreBoxesMatched (0, 1, 2, mark) || AreBoxesMatched (3, 4, 5, mark) || AreBoxesMatched (6, 7, 8, mark) ||
+        AreBoxesMatched (0, 3, 6, mark) || AreBoxesMatched (1, 4, 7, mark) || AreBoxesMatched (2, 5, 8, mark) ||
+        AreBoxesMatched (0, 4, 8, mark) || AreBoxesMatched (2, 4, 6, mark);
     }
 
 
-    private bool AreBoxesMatched(int i, int j, int k)
+    private bool AreBoxesMatched(int i, int j, int k, Mark mark)
     {
-        Mark m = currentMark;
+        Mark m = mark;
         bool match = (marks[i] == m && marks[j] == m && marks[k] == m);
         return match;
     }
 
-    private Sprite GetSprite()
+    private Sprite GetSprite(Mark mark)
     {
-        return(currentMark == Mark.X) ? spriteX : spriteO;
+        return(mark == Mark.X) ? spriteX : spriteO;
     }
 
 
-    Box FindBox(int _Index)
+    public Box FindBox(int _Index)
     {
         if (_Index != null)
         {

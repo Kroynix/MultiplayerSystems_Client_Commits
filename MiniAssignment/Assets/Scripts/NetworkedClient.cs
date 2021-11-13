@@ -170,28 +170,27 @@ public class NetworkedClient : MonoBehaviour
             string message = csv[2];
             FindObjectOfType<ChatBehaviour>().AddTextToChat(name + ": " + message);
         }
-        /*
-        else if (signifier == ChatStates.ConnectedUserList)
-        {
-            string name = csv[1];
-            string identifier = csv[2];
-            idlist.Add(new IDName(identifier, name));
 
-            foreach(IDName identity in idlist)
-                FindObjectOfType<ChatBehaviour>().AddUserToList(identity.name + "");
-        }
-        */
-        else if (signifier == ServerToClientSignifiers.AddToGameSession)
-        {
-            gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.ToGame);
-        }
 
-        else if (signifier == ServerToClientSignifiers.SendMoveToClients)
-        {
-            int move = int.Parse(csv[1]);
-            Debug.Log("Move That was Sent is: " + move);
-        }
 
+
+        // Match
+        if (signifier == ServerToClientSignifiers.MatchResponse)
+        {
+                
+            int MatchSignifier = int.Parse(csv[1]);
+            if (MatchSignifier == GameSignifiers.AddToGameSession)
+            {
+                gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.ToGame);
+            }
+
+            else if (MatchSignifier == GameSignifiers.SendMoveToClients)
+            {
+                int move = int.Parse(csv[2]);
+                FindObjectOfType<Board>().HitBox(FindObjectOfType<Board>().FindBox(move), Mark.X);
+                FindObjectOfType<Board>().canPlay = true;
+            }
+        }
 
 
 
@@ -217,26 +216,4 @@ public class NetworkedClient : MonoBehaviour
     }
 
 
-}
-
-/*
-public class IDName
-{
-    public string id;
-    public string name;
-
-    public IDName(string identifitier, string Name)
-    {
-        id = identifitier;
-        name = Name;
-    }
-
-}
-*/
-
-
-
-public class GameSession
-{
-    
 }
