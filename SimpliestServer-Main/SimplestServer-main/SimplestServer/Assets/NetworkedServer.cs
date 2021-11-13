@@ -19,6 +19,7 @@ public class NetworkedServer : MonoBehaviour
     LinkedList<PlayerAccount> playerAccounts;
     string playerAccountFilePath;
     List<GameSession> gameSessions;
+
     
     int playerWaitingForMatch = -1;
 
@@ -28,7 +29,7 @@ public class NetworkedServer : MonoBehaviour
 
         Debug.Log("Started Server");
         // "Kind of a constant"
-        playerAccountFilePath = Application.dataPath + Path.DirectorySeparatorChar + "PlayerAccountData.txt";
+        playerAccountFilePath = Application.dataPath + Path.DirectorySeparatorChar + "UserFiles" + Path.DirectorySeparatorChar + "PlayerAccountData.txt";
 
 
         NetworkTransport.Init();
@@ -42,6 +43,7 @@ public class NetworkedServer : MonoBehaviour
         playerAccounts = new LinkedList<PlayerAccount>();
         idlist = new List<int>();
         gameSessions = new List<GameSession>();
+        
 
 
         //We need to load our saved Player Accounts.
@@ -211,11 +213,12 @@ public class NetworkedServer : MonoBehaviour
             {
                 int move = int.Parse(csv[2]);
                 Debug.Log("Square User placed on is: " + move);
-
                 GameSession gs = FindGameSessionWithPlayerID(id);
+
 
                 if(gs != null) 
                 {
+                    gs.playerMoves.AddLast(move);
                     if(gs.playerID1 == id)
                         SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.SendMoveToClients + "," + move, gs.playerID2);
                     else
@@ -230,15 +233,34 @@ public class NetworkedServer : MonoBehaviour
                 {
                     SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.EndGame, gs.playerID1);
                     SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.EndGame, gs.playerID2);
+                    
                 }
             }
 
             else if (MatchSignifier == GameSignifiers.ResetGame)
             {
                 GameSession gs = FindGameSessionWithPlayerID(id);
-                SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ResetGame + "," + 0, gs.playerID1);
-                SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ResetGame + "," + 1, gs.playerID2);
+
+                if(gs != null)
+                {
+                    gs.playerMoves.Clear();
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ResetGame + "," + 0, gs.playerID1);
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ResetGame + "," + 1, gs.playerID2);
+
+                }
             }
+
+            else if (MatchSignifier == GameSignifiers.RequestingReplay)
+            {
+                GameSession gs = FindGameSessionWithPlayerID(id);
+                foreach(int n in gs.playerMoves)
+                {
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.SendingReplay + "," + n, id);
+                }
+            }
+
+
+
 
         }
         
@@ -294,12 +316,15 @@ public class NetworkedServer : MonoBehaviour
 public class GameSession
 {
     public int playerID1, playerID2;
+    public List<int> observers = new List<int>();
+    public LinkedList<int> playerMoves = new LinkedList<int>();
 
     public GameSession(int id1, int id2)
     {
         playerID1 = id1;
         playerID2 = id2;
     }
+
 
 
 }
@@ -358,6 +383,9 @@ public static class GameSignifiers
     public const int SendMoveToClients = 4;
     public const int EndGame = 5;
     public const int ResetGame = 6;
+    public const int LookUpRoom = 7;
+    public const int SendingReplay = 8;
+    public const int RequestingReplay = 9;
 }
 
 
@@ -365,9 +393,9 @@ public static class GameSignifiers
 
 public static class ChatStates
 {
-    public const int ClientToServer = 7;
-    public const int ServerToClient = 8;
-    public const int ConnectedUserList = 9;
+    public const int ClientToServer = 20;
+    public const int ServerToClient = 21;
+    public const int ConnectedUserList = 22;
 }
 
 
