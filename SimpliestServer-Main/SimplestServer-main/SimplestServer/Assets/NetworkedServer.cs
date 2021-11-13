@@ -18,7 +18,7 @@ public class NetworkedServer : MonoBehaviour
 
     LinkedList<PlayerAccount> playerAccounts;
     string playerAccountFilePath;
-    LinkedList<GameSession> gameSessions;
+    List<GameSession> gameSessions;
     
     int playerWaitingForMatch = -1;
 
@@ -41,7 +41,7 @@ public class NetworkedServer : MonoBehaviour
         // List of Player accounts and current connected ID's
         playerAccounts = new LinkedList<PlayerAccount>();
         idlist = new List<int>();
-        gameSessions = new LinkedList<GameSession>();
+        gameSessions = new List<GameSession>();
 
 
         //We need to load our saved Player Accounts.
@@ -156,16 +156,6 @@ public class NetworkedServer : MonoBehaviour
                     {
                         SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.Success + "," + "You have Successfully Logged In", id);
                         SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.SendUsername + "," + n, id);
-                        /*
-                        foreach (int identifier in idlist)
-                        {
-                            SendMessageToClient(ChatStates.ConnectedUserList + "," + n + "," + id, id);
-                        }
-
-                        idNameLink.Add(new IDName(id, n));
-                        */
-                        
-
                     }
                     else
                     {
@@ -195,10 +185,7 @@ public class NetworkedServer : MonoBehaviour
         }
 
 
-
-
         // Match Signifier Handling
-
         else if (signifier == ClientToServerSignifiers.Match)
         {
             int MatchSignifier = int.Parse(csv[1]);
@@ -212,9 +199,9 @@ public class NetworkedServer : MonoBehaviour
                 else 
                 {
                     GameSession gs = new GameSession(playerWaitingForMatch, id);
-                    gameSessions.AddLast(gs);
-                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.AddToGameSession, gs.playerID1);
-                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.AddToGameSession, gs.playerID2);
+                    gameSessions.Add(gs);
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.AddToGameSession + "," + 1, gs.playerID1);
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.AddToGameSession + "," + 0, gs.playerID2);
                     playerWaitingForMatch = -1;
                     Debug.Log("User found match!");
                 }
@@ -245,7 +232,16 @@ public class NetworkedServer : MonoBehaviour
                     SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.EndGame, gs.playerID2);
                 }
             }
+
+            else if (MatchSignifier == GameSignifiers.ResetGame)
+            {
+                GameSession gs = FindGameSessionWithPlayerID(id);
+                SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ResetGame + "," + 0, gs.playerID1);
+                SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ResetGame + "," + 1, gs.playerID2);
+            }
+
         }
+        
 
     }
 
@@ -361,6 +357,7 @@ public static class GameSignifiers
     public const int AddToGameSession = 3;
     public const int SendMoveToClients = 4;
     public const int EndGame = 5;
+    public const int ResetGame = 6;
 }
 
 
