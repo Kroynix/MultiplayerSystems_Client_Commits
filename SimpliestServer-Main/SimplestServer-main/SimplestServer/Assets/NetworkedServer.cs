@@ -194,41 +194,50 @@ public class NetworkedServer : MonoBehaviour
             }
         }
 
-        else if (signifier == ClientToServerSignifiers.FindMatch)
+
+
+
+        // Match Signifier Handling
+
+        else if (signifier == ClientToServerSignifiers.Match)
         {
-            if(playerWaitingForMatch == -1)
+            int MatchSignifier = int.Parse(csv[1]);
+
+            if (MatchSignifier == GameSignifiers.FindMatch)
             {
-                playerWaitingForMatch = id;
+                if(playerWaitingForMatch == -1)
+                {
+                    playerWaitingForMatch = id;
+                }
+                else 
+                {
+                    GameSession gs = new GameSession(playerWaitingForMatch, id);
+                    gameSessions.AddLast(gs);
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.AddToGameSession, gs.playerID1);
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.AddToGameSession, gs.playerID2);
+                    playerWaitingForMatch = -1;
+                    Debug.Log("User found match!");
+                }
             }
 
-            else 
+            else if (MatchSignifier == GameSignifiers.SendMoveToServer)
             {
-                GameSession gs = new GameSession(playerWaitingForMatch, id);
-                gameSessions.AddLast(gs);
-                SendMessageToClient(ServerToClientSignifiers.AddToGameSession + "", gs.playerID1);
-                SendMessageToClient(ServerToClientSignifiers.AddToGameSession + "", gs.playerID2);
-                playerWaitingForMatch = -1;
-                Debug.Log("User found match!");
+                int move = int.Parse(csv[2]);
+                Debug.Log("Square User placed on is: " + move);
+
+                GameSession gs = FindGameSessionWithPlayerID(id);
+
+                if(gs != null) 
+                {
+                    if(gs.playerID1 == id)
+                        SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.SendMoveToClients + "," + move, gs.playerID2);
+                    else
+                        SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.SendMoveToClients + "," + move, gs.playerID1);
+                }
             }
+
+            
         }
-
-        else if (signifier == ClientToServerSignifiers.SendMoveToServer)
-        {
-            int move = int.Parse(csv[1]);
-            Debug.Log("Square User placed on is: " + move);
-
-            GameSession gs = FindGameSessionWithPlayerID(id);
-
-            if(gs != null) 
-            {
-                if(gs.playerID1 == id)
-                    SendMessageToClient(ServerToClientSignifiers.SendMoveToClients + "," + move, gs.playerID2);
-                else
-                    SendMessageToClient(ServerToClientSignifiers.SendMoveToClients + "," + move, gs.playerID1);
-            }
-        }
-
-
 
     }
 
@@ -320,19 +329,33 @@ public class PlayerAccount
 
 
 // Front Signifiers
-public static class ClientToServerSignifiers{
+public static class ClientToServerSignifiers
+{
     public const int Login = 1;
     public const int CreateAccount = 2;
-    public const int FindMatch = 3;
-    public const int SendMoveToServer = 5;
+    public const int Match = 3;
+
     
 }
 
-public static class ServerToClientSignifiers{
+public static class ServerToClientSignifiers
+{
     public const int LoginResponse = 1;
-    public const int AddToGameSession = 4;
-    public const int SendMoveToClients = 6;
+    public const int MatchResponse = 4;
+
 }
+
+
+public static class GameSignifiers
+{
+    public const int FindMatch = 1;
+    public const int SendMoveToServer = 2;
+    public const int AddToGameSession = 3;
+    public const int SendMoveToClients = 4;
+}
+
+
+
 
 public static class ChatStates
 {
