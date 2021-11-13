@@ -15,10 +15,12 @@ public class NetworkedServer : MonoBehaviour
     int socketPort = 3389;
 
     List<int> idlist;
-    List<IDName> idNameLink;
 
     LinkedList<PlayerAccount> playerAccounts;
     string playerAccountFilePath;
+    LinkedList<GameSession> gameSessions;
+    
+    int playerWaitingForMatch = -1;
 
     // Start is called before the first frame update
     void Start()
@@ -39,7 +41,8 @@ public class NetworkedServer : MonoBehaviour
         // List of Player accounts and current connected ID's
         playerAccounts = new LinkedList<PlayerAccount>();
         idlist = new List<int>();
-        idNameLink = new List<IDName>();
+        gameSessions = new LinkedList<GameSession>();
+
 
         //We need to load our saved Player Accounts.
         LoadPlayerAccounts();
@@ -47,7 +50,8 @@ public class NetworkedServer : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update() {
+    void Update() 
+    {
 
         int recHostID;
         int recConnectionID;
@@ -98,7 +102,7 @@ public class NetworkedServer : MonoBehaviour
     
     private void ProcessRecievedMsg(string msg, int id)
     {
-        Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
+        //Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
 
         string[] csv = msg.Split(',');
 
@@ -192,13 +196,35 @@ public class NetworkedServer : MonoBehaviour
 
         else if (signifier == ClientToServerSignifiers.FindMatch)
         {
-            Debug.Log("User trying to find match");
+            if(playerWaitingForMatch == -1)
+            {
+                playerWaitingForMatch = id;
+            }
+
+            else 
+            {
+                GameSession gs = new GameSession(playerWaitingForMatch, id);
+                gameSessions.AddLast(gs);
+                SendMessageToClient(ServerToClientSignifiers.AddToGameSession + "", gs.playerID1);
+                SendMessageToClient(ServerToClientSignifiers.AddToGameSession + "", gs.playerID2);
+                playerWaitingForMatch = -1;
+                Debug.Log("User found match!");
+            }
         }
 
-        else if (signifier == ClientToServerSignifiers.AddToGameSeesion)
+        else if (signifier == ClientToServerSignifiers.SendMoveToServer)
         {
+            int move = int.Parse(csv[1]);
+            Debug.Log("Square User placed on is: " + move);
 
+            GameSession gs = FindGameSessionWithPlayerID(id);
+
+            if(gs.playerID1 == id)
+                SendMessageToClient(ServerToClientSignifiers.SendMoveToClients + "," + move, gs.playerID2);
+            else
+                SendMessageToClient(ServerToClientSignifiers.SendMoveToClients + "," + move, gs.playerID1);
         }
+
 
 
     }
@@ -206,13 +232,16 @@ public class NetworkedServer : MonoBehaviour
 
     private void SavePlayerAccounts()
     {
-        StreamWriter sw = new StreamWriter(playerAccountFilePath);
-
-        foreach(PlayerAccount pa in playerAccounts)
+        //StreamWriter sw = new StreamWriter(playerAccountFilePath);
+        using (StreamWriter sw = File.AppendText(playerAccountFilePath))
         {
-            sw.WriteLine(pa.Name + "," + pa.Password);
+            foreach(PlayerAccount pa in playerAccounts)
+            {
+                sw.WriteLine(pa.Name + "," + pa.Password);
+            }
+            sw.Close();
         }
-        sw.Close();
+        
     }
 
 
@@ -233,11 +262,29 @@ public class NetworkedServer : MonoBehaviour
         }
     }
 
-}
 
+    private GameSession FindGameSessionWithPlayerID(int id)
+    {
+        foreach(GameSession gs in gameSessions)
+        {
+            if(gs.playerID1 == id || gs.playerID2 == id)
+                return gs;
+        }
+        return null;
+    }
+
+}
 
 public class GameSession
 {
+    public int playerID1, playerID2;
+
+    public GameSession(int id1, int id2)
+    {
+        playerID1 = id1;
+        playerID2 = id2;
+    }
+
 
 }
 
@@ -269,20 +316,30 @@ public class PlayerAccount
 }
 
 
-
+// Front Signifiers
 public static class ClientToServerSignifiers{
     public const int Login = 1;
     public const int CreateAccount = 2;
     public const int FindMatch = 3;
-    public const int AddToGameSeesion = 4;
+    public const int SendMoveToServer = 5;
+    
 }
 
 public static class ServerToClientSignifiers{
     public const int LoginResponse = 1;
+    public const int AddToGameSession = 4;
+    public const int SendMoveToClients = 6;
+}
 
+public static class ChatStates
+{
+    public const int ClientToServer = 7;
+    public const int ServerToClient = 8;
+    public const int ConnectedUserList = 9;
 }
 
 
+// Back Signifiers
 public static class LoginResponses{
     public const int Success = 1;
     public const int FailureNameInUse = 2;
@@ -292,12 +349,7 @@ public static class LoginResponses{
     public const int SendUsername = 6;
 }
 
-public static class ChatStates
-{
-    public const int ClientToServer = 7;
-    public const int ServerToClient = 8;
-    public const int ConnectedUserList = 9;
-}
+
 
 
 
