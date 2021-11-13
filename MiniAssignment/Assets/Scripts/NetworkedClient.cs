@@ -183,7 +183,7 @@ public class NetworkedClient : MonoBehaviour
         */
         else if (signifier == ServerToClientSignifiers.AddToGameSession)
         {
-            Debug.Log("Swapped To GameSession");
+            gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.ToGame);
         }
 
 

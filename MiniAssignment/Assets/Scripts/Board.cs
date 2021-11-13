@@ -63,8 +63,16 @@ public class Board : MonoBehaviour
 
 
         if(canPlay)
-            if (hit)//box is touched.
-                HitBox (hit.GetComponent <Box>());
+            if (hit) 
+                FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.SendMoveToServer + "," + hit.GetComponent<Box>().index);
+
+
+        //Debug.Log(hit.GetComponent<Box>().index);
+        // Use this if we we're trying to set it, internally here.
+        // But for this we are gonna send which BoxIndex we clicked on to the server 
+        // Send it back to both players and Find the box by the Index then call
+        // HitBox
+        //HitBox (hit.GetComponent <Box>());
       }
 
     }

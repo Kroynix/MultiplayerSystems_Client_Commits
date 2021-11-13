@@ -20,8 +20,6 @@ public class GameSystemManager : MonoBehaviour
     GameObject invalidPass,invalidUser,invalidUserExist,accCreated, invalidIn;
 
 
-    public string name;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -44,9 +42,8 @@ public class GameSystemManager : MonoBehaviour
                 ChatRoom = go;
             else if (go.name == "WaitingForMatch")
                 WaitingMatch = go;
-            else if (go.name == "Ingame")
+            else if (go.name == "Gameplay")
                 InGame = go;
-
 
 
             // Game Objects - Login System
@@ -89,9 +86,7 @@ public class GameSystemManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.S))
-            networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.test + "," + "Hello from client");
-            //Debug.Log(System.DateTime.Now);
+
         
     }
 
@@ -135,6 +130,7 @@ public class GameSystemManager : MonoBehaviour
             ChatRoom.SetActive(false);
             Loading.SetActive(false);
             WaitingMatch.SetActive(false);
+            InGame.SetActive(false);
         }
         else if (newState == GameStates.MainMenu)
         {
@@ -142,6 +138,7 @@ public class GameSystemManager : MonoBehaviour
             ChatRoom.SetActive(true);
             Loading.SetActive(false);
             WaitingMatch.SetActive(false);
+            InGame.SetActive(false);
             
         }
         else if (newState == GameStates.Loading)
@@ -150,6 +147,7 @@ public class GameSystemManager : MonoBehaviour
             ChatRoom.SetActive(false);
             Loading.SetActive(true);
             WaitingMatch.SetActive(false);
+            InGame.SetActive(false);
         }
 
         else if (newState == GameStates.WaitingForMatch)
@@ -158,6 +156,16 @@ public class GameSystemManager : MonoBehaviour
             ChatRoom.SetActive(false);
             Loading.SetActive(false);
             WaitingMatch.SetActive(true);
+            InGame.SetActive(false);
+        }
+
+        else if (newState == GameStates.ToGame)
+        {
+            LoginSystem.SetActive(false);
+            ChatRoom.SetActive(false);
+            Loading.SetActive(false);
+            WaitingMatch.SetActive(false);
+            InGame.SetActive(true);
         }
 
     }
@@ -220,14 +228,14 @@ public static class ClientToServerSignifiers
     public const int Login = 1;
     public const int CreateAccount = 2;
     public const int FindMatch = 3;
-    public const int test = 5;
+    public const int SendMoveToServer = 5;
 }
 
 public static class ServerToClientSignifiers
 {
     public const int LoginResponse = 1;
     public const int AddToGameSession = 4;
-
+    public const int SendMoveToClients = 6;
 }
 
 
@@ -249,6 +257,7 @@ public static class GameStates
     public const int WaitingForMatch = 3;
     public const int PlayingTicTacToe = 4;
     public const int Loading = 5;
+    public const int ToGame = 6;
 
 }
 
