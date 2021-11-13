@@ -244,6 +244,7 @@ public static class GameSignifiers
     public const int SendMoveToServer = 2;
     public const int AddToGameSession = 3;
     public const int SendMoveToClients = 4;
+    public const int EndGame = 5;
 }
 
 

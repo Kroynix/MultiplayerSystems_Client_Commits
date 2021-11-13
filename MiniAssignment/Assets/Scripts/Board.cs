@@ -46,8 +46,6 @@ public class Board : MonoBehaviour
 
 
         GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
-
-
         // Get Reference to all needed Game Objects
         foreach (GameObject go in allObjects)
         {
@@ -100,6 +98,7 @@ public class Board : MonoBehaviour
 
             if(won)
             {
+                FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.EndGame);
                 displayWinner(mark);
                 canPlay = false;
                 return;
@@ -108,6 +107,12 @@ public class Board : MonoBehaviour
 
     }
 
+
+    public void RemoteEndGame()
+    {
+        canPlay = false;
+
+    }
 
 
     private void displayWinner(Mark mark)

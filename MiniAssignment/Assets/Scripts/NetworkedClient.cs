@@ -190,11 +190,14 @@ public class NetworkedClient : MonoBehaviour
                 FindObjectOfType<Board>().HitBox(FindObjectOfType<Board>().FindBox(move), Mark.X);
                 FindObjectOfType<Board>().canPlay = true;
             }
+
+            else if (MatchSignifier == GameSignifiers.EndGame)
+            {
+                FindObjectOfType<Board>().RemoteEndGame();
+            }
         }
 
 
-
-        //ChangeGameState(GameStates.MainMenu);
     }
 
     public bool IsConnected()
