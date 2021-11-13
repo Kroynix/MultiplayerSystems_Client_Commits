@@ -65,21 +65,13 @@ public class GameSystemManager : MonoBehaviour
                 accCreated = go;
             else if (go.name == "InvalidInput")
                 invalidIn = go;
-
         }
 
-
-    // After getting References Disable the ones we don't need right now
-
-    // Ensure that State is being set to Login
-    //ChangeGameState(GameStates.Login);
 
     // Setting Error Messages for LoginMenu off after getting reference
     ValueChanged();
 
     toggleCreate.GetComponent<Toggle>().onValueChanged.AddListener(toggleCreateValueChanged);
-
-
 
     }
 

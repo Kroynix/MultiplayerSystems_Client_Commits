@@ -186,6 +186,12 @@ public class NetworkedClient : MonoBehaviour
             gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.ToGame);
         }
 
+        else if (signifier == ServerToClientSignifiers.SendMoveToClients)
+        {
+            int move = int.Parse(csv[1]);
+            Debug.Log("Move That was Sent is: " + move);
+        }
+
 
 
 
