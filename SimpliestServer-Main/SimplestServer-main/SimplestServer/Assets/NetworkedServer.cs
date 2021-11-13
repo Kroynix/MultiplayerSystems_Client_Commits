@@ -219,10 +219,13 @@ public class NetworkedServer : MonoBehaviour
 
             GameSession gs = FindGameSessionWithPlayerID(id);
 
-            if(gs.playerID1 == id)
-                SendMessageToClient(ServerToClientSignifiers.SendMoveToClients + "," + move, gs.playerID2);
-            else
-                SendMessageToClient(ServerToClientSignifiers.SendMoveToClients + "," + move, gs.playerID1);
+            if(gs != null) 
+            {
+                if(gs.playerID1 == id)
+                    SendMessageToClient(ServerToClientSignifiers.SendMoveToClients + "," + move, gs.playerID2);
+                else
+                    SendMessageToClient(ServerToClientSignifiers.SendMoveToClients + "," + move, gs.playerID1);
+            }
         }
 
 
