@@ -17,6 +17,10 @@ public class Board : MonoBehaviour
     public Mark[] marks;
     private Camera cam;
     public bool canPlay;
+    Mark replayMark;
+
+
+
     //private LineRenderer lineRenderer;
 
 
@@ -35,13 +39,11 @@ public class Board : MonoBehaviour
     {
         boxes = FindObjectsOfType<Box>();
         cam = Camera.main;
-
+        replayMark = Mark.O;
         //lineRenderer = GetComponent<LineRenderer> ();
         //lineRenderer.enabled = false;
         marks = new Mark[9];
         canPlay = true;
-
-
 
         GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
         // Get Reference to all needed Game Objects
@@ -52,7 +54,7 @@ public class Board : MonoBehaviour
                 xwin = go;
             else if (go.name == "Owin")
                 owin = go;
-            else if (go.name == "tie")
+            else if (go.name == "Tie")
                 tie = go;
         }
 
@@ -69,23 +71,27 @@ public class Board : MonoBehaviour
             Vector2 touchPosition = cam.ScreenToWorldPoint (Input.mousePosition);
 
             Collider2D hit = Physics2D.OverlapCircle (touchPosition, touchRadius, boxesLayerMask);
-
-
             if(canPlay)
             {
                 if (hit) 
                 {
                     HitBox (hit.GetComponent <Box>(), Mark.O);
                     FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.SendMoveToServer + "," + hit.GetComponent<Box>().index);
-                    Debug.Log(ClientToServerSignifiers.Match + "," + GameSignifiers.SendMoveToServer + "," + hit.GetComponent<Box>().index);
                     canPlay = false;
                     
                 }
             }
         }
 
-        Debug.Log(marksCount);
     }
+
+
+    private void SwitchPlayer()
+    {
+        replayMark = (replayMark == Mark.X) ? Mark.O : Mark.X;
+    }
+
+
 
     public void HitBox (Box box, Mark mark) 
     {
@@ -125,11 +131,18 @@ public class Board : MonoBehaviour
     public void RestartGame()
     {
         foreach(Box box in boxes)
-        {
             box.ResetBox();
-        }
-        FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.ResetGame);
+        
+
+        for(int i = 0; i < marks.Length; i++)
+            marks[i] = Mark.None;
+
+        marksCount = 0;
+        tie.SetActive(false);
+        xwin.SetActive(false);
+        owin.SetActive(false);
     }
+
 
     private void displayTie()
     {

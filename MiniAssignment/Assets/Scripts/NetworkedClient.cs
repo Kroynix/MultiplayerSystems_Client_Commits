@@ -19,6 +19,7 @@ public class NetworkedClient : MonoBehaviour
 
 
 
+    public LinkedList<int> replay;
     //List<IDName> idlist;
 
     GameObject gameSystemManager;
@@ -29,6 +30,7 @@ public class NetworkedClient : MonoBehaviour
     {
         //idlist = new List<IDName>();
 
+        replay = new LinkedList<int>();
         GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
 
         foreach (GameObject go in allObjects)
@@ -44,6 +46,14 @@ public class NetworkedClient : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            Debug.Log("Below is Replay");
+            foreach(int i in replay)
+                Debug.Log("Replay: " + i);
+        }
+
+
         UpdateNetworkConnection();
     }
 
@@ -124,7 +134,6 @@ public class NetworkedClient : MonoBehaviour
 
         int signifier = int.Parse(csv[0]);
 
-        Debug.Log(signifier);
 
         if(signifier == ServerToClientSignifiers.LoginResponse)
         {
@@ -203,14 +212,25 @@ public class NetworkedClient : MonoBehaviour
             else if (MatchSignifier == GameSignifiers.ResetGame)
             {
                 int turnOrder = int.Parse(csv[2]);
+
                 if (turnOrder == 1)
                     FindObjectOfType<Board>().canPlay = true;
                 else if (turnOrder == 0)
                     FindObjectOfType<Board>().canPlay = false;
 
-                    
+
+                replay.Clear();
                 FindObjectOfType<Board>().RestartGame();
             }
+
+            else if (MatchSignifier == GameSignifiers.SendingReplay)
+            {
+                replay.AddLast(int.Parse(csv[2]));
+            }
+
+            
+
+
         }
 
 

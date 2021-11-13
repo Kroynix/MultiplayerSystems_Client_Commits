@@ -175,6 +175,22 @@ public class GameSystemManager : MonoBehaviour
     }
 
 
+    public void LookUpRoomsButtonPressed()
+    {
+        networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.LookUpRoom);
+    }
+
+    public void RestartGameButtonPressed()
+    {
+        FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.ResetGame);
+    }
+
+    public void RequestReplayButtonPressed()
+    {
+        networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.RequestingReplay);
+    }
+
+
     #region ErrorMessages
 
     public void ValueChanged()
@@ -244,6 +260,9 @@ public static class GameSignifiers
     public const int SendMoveToClients = 4;
     public const int EndGame = 5;
     public const int ResetGame = 6;
+    public const int LookUpRoom = 7;
+    public const int SendingReplay = 8;
+    public const int RequestingReplay = 9;
 }
 
 
@@ -275,9 +294,9 @@ public static class GameStates
 
 public static class ChatStates
 {
-    public const int ClientToServer = 7;
-    public const int ServerToClient = 8;
-    public const int ConnectedUserList = 9;
+    public const int ClientToServer = 20;
+    public const int ServerToClient = 21;
+    public const int ConnectedUserList = 22;
 }
 
 #endregion Signifiers
