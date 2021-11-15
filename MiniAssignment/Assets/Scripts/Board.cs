@@ -31,8 +31,12 @@ public class Board : MonoBehaviour
     private Box[] boxes;
     private Box targetBox;
 
-    // Game Objects
+    // Game Objects - Winner Text
     GameObject xwin, owin, tie;
+
+    // Game Objects - Buttons
+    GameObject resetGame, requestReplay;
+
 
     // Start is called before the first frame update
     void Start()
@@ -45,6 +49,8 @@ public class Board : MonoBehaviour
         marks = new Mark[9];
         canPlay = true;
 
+
+        // Get list of every gameObject
         GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
         // Get Reference to all needed Game Objects
         foreach (GameObject go in allObjects)
@@ -56,6 +62,12 @@ public class Board : MonoBehaviour
                 owin = go;
             else if (go.name == "Tie")
                 tie = go;
+            else if (go.name == "ReplayGame")
+                resetGame = go;
+            else if (go.name == "RequestReplay")
+                requestReplay = go;
+
+
         }
 
 
@@ -70,7 +82,7 @@ public class Board : MonoBehaviour
         {
             Vector2 touchPosition = cam.ScreenToWorldPoint (Input.mousePosition);
 
-            Collider2D hit = Physics2D.OverlapCircle (touchPosition, touchRadius, boxesLayerMask);
+            Collider2D hit = Physics2D.OverlapCircle(touchPosition, touchRadius, boxesLayerMask);
             if(canPlay)
             {
                 if (hit) 
@@ -108,6 +120,8 @@ public class Board : MonoBehaviour
             {
                 FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.EndGame);
                 displayWinner(mark);
+                resetGame.SetActive(true);
+                requestReplay.SetActive(true);
                 canPlay = false;
                 return;
             }
@@ -115,6 +129,8 @@ public class Board : MonoBehaviour
             if (marksCount == 9)
             {
                 displayTie();
+                resetGame.SetActive(true);
+                requestReplay.SetActive(true);
                 FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.EndGame);
             }
         }
@@ -141,6 +157,8 @@ public class Board : MonoBehaviour
         tie.SetActive(false);
         xwin.SetActive(false);
         owin.SetActive(false);
+        resetGame.SetActive(false);
+        requestReplay.SetActive(false);
     }
 
 

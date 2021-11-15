@@ -228,6 +228,12 @@ public class NetworkedClient : MonoBehaviour
                 replay.AddLast(int.Parse(csv[2]));
             }
 
+            else if (MatchSignifier == GameSignifiers.QuitGame)
+            {
+                replay.Clear();
+                FindObjectOfType<Board>().RestartGame();
+                gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.MainMenu);
+            }
             
 
 
@@ -249,7 +255,7 @@ public class NetworkedClient : MonoBehaviour
 
     IEnumerator LoadGame()
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(2);
         FindObjectOfType<AudioController>().Play("Success"); 
         gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.Login);
     }

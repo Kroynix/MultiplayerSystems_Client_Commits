@@ -20,6 +20,7 @@ namespace Interface.Elements.Scripts
         private void Start()
         {
             PlayAnimation(isPlaying);
+
         }
 
         private void PlayAnimation(bool isPlaying)
