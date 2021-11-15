@@ -14,13 +14,13 @@ public class NetworkedServer : MonoBehaviour
     int hostID;
     int socketPort = 3389;
 
+
+
     List<int> idlist;
-
     LinkedList<PlayerAccount> playerAccounts;
-    string playerAccountFilePath;
     List<GameSession> gameSessions;
-
-    
+    string playerAccountFilePath;
+    string userRecordingFilePath;
     int playerWaitingForMatch = -1;
 
     // Start is called before the first frame update
@@ -30,6 +30,7 @@ public class NetworkedServer : MonoBehaviour
         Debug.Log("Started Server");
         // "Kind of a constant"
         playerAccountFilePath = Application.dataPath + Path.DirectorySeparatorChar + "UserFiles" + Path.DirectorySeparatorChar + "PlayerAccountData.txt";
+        userRecordingFilePath = Application.dataPath + Path.DirectorySeparatorChar + "RecordingFiles" + Path.DirectorySeparatorChar;
 
 
         NetworkTransport.Init();
@@ -72,15 +73,6 @@ public class NetworkedServer : MonoBehaviour
             case NetworkEventType.ConnectEvent:
                 Debug.Log("Connection, " + recConnectionID);
                 idlist.Add(recConnectionID);
-
-                /*
-                foreach(IDName identity in idNameLink)
-                {
-                    if (identity.id != recConnectionID)
-                        SendMessageToClient(ChatStates.ConnectedUserList + "," + identity.name + "," + identity.id, identity.id);
-                }
-                */
-
                 break;
             case NetworkEventType.DataEvent:
                 string msg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
@@ -255,10 +247,22 @@ public class NetworkedServer : MonoBehaviour
                 GameSession gs = FindGameSessionWithPlayerID(id);
                 foreach(int n in gs.playerMoves)
                 {
+                    // Send move back only to requesting ID.
                     SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.SendingReplay + "," + n, id);
                 }
             }
 
+
+            else if (MatchSignifier == GameSignifiers.QuitGame)
+            {
+                GameSession gs = FindGameSessionWithPlayerID(id);
+
+                if(gs != null)
+                {
+                        SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, gs.playerID2);
+                        SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, gs.playerID1);
+                }
+            }
 
 
 
@@ -386,6 +390,7 @@ public static class GameSignifiers
     public const int LookUpRoom = 7;
     public const int SendingReplay = 8;
     public const int RequestingReplay = 9;
+    public const int QuitGame = 10;
 }
 
 
