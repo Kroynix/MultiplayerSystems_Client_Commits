@@ -49,7 +49,7 @@ public class Board : MonoBehaviour
         cam = Camera.main;
         replayMark = Mark.O;
         marks = new Mark[9];
-        canPlay = true;
+        canPlay = false;
 
 
         // Get list of every gameObject

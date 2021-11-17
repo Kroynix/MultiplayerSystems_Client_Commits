@@ -14,11 +14,14 @@ public class GameSystemManager : MonoBehaviour
     GameObject networkedClient;
 
     // States
-    GameObject Loading,LoginSystem, ChatRoom, WaitingMatch, InGame;
+    GameObject Loading,LoginSystem, ChatRoom, WaitingMatch, InGame, ReplayState;
 
     // Login Menu Messages 
     GameObject invalidPass,invalidUser,invalidUserExist,accCreated, invalidIn;
     public string name;
+
+
+    // Replay System
 
     // Start is called before the first frame update
     void Start()
@@ -44,6 +47,8 @@ public class GameSystemManager : MonoBehaviour
                 WaitingMatch = go;
             else if (go.name == "Gameplay")
                 InGame = go;
+            else if (go.name == "ReplaySystem")
+                ReplayState = go;
 
 
             // Game Objects - Login System
@@ -127,6 +132,7 @@ public class GameSystemManager : MonoBehaviour
             Loading.SetActive(false);
             WaitingMatch.SetActive(false);
             InGame.SetActive(false);
+            ReplayState.SetActive(false);
         }
         else if (newState == GameStates.MainMenu)
         {
@@ -135,6 +141,7 @@ public class GameSystemManager : MonoBehaviour
             Loading.SetActive(false);
             WaitingMatch.SetActive(false);
             InGame.SetActive(false);
+            ReplayState.SetActive(false);
             
         }
         else if (newState == GameStates.Loading)
@@ -144,6 +151,7 @@ public class GameSystemManager : MonoBehaviour
             Loading.SetActive(true);
             WaitingMatch.SetActive(false);
             InGame.SetActive(false);
+            ReplayState.SetActive(false);
         }
 
         else if (newState == GameStates.WaitingForMatch)
@@ -153,6 +161,7 @@ public class GameSystemManager : MonoBehaviour
             Loading.SetActive(false);
             WaitingMatch.SetActive(true);
             InGame.SetActive(false);
+            ReplayState.SetActive(false);
         }
 
         else if (newState == GameStates.ToGame)
@@ -162,6 +171,17 @@ public class GameSystemManager : MonoBehaviour
             Loading.SetActive(false);
             WaitingMatch.SetActive(false);
             InGame.SetActive(true);
+            ReplayState.SetActive(false);
+        }
+
+        else if (newState == GameStates.Replay)
+        {
+            LoginSystem.SetActive(false);
+            ChatRoom.SetActive(false);
+            Loading.SetActive(false);
+            WaitingMatch.SetActive(false);
+            InGame.SetActive(true);
+            ReplayState.SetActive(true);
         }
 
     }
@@ -188,7 +208,17 @@ public class GameSystemManager : MonoBehaviour
     public void QuitGameButtonPressed()
     {
         networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.QuitGame);
+        ChangeGameState(GameStates.WaitingForMatch);
     }
+
+
+    public void ReplayButtonPressed()
+    {
+        networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Replay + "," + ReplaySignifiers.StartingReplay);
+        ChangeGameState(GameStates.Replay);
+    }
+
+
 
 
 
@@ -242,6 +272,7 @@ public static class ClientToServerSignifiers
     public const int Login = 1;
     public const int CreateAccount = 2;
     public const int Match = 3;
+    public const int Replay = 5;
 
 }
 
@@ -249,8 +280,21 @@ public static class ServerToClientSignifiers
 {
     public const int LoginResponse = 1;
     public const int MatchResponse = 4;
+    public const int ReplayResponse = 6;
 
 }
+
+public static class ReplaySignifiers
+{
+    public const int RequestingReplay = 1;
+    public const int SendingReplay = 2;
+    public const int StartingReplay = 3;
+    public const int SendingFiles = 4;
+
+
+}
+
+
 
 
 public static class GameSignifiers
@@ -290,6 +334,7 @@ public static class GameStates
     public const int PlayingTicTacToe = 4;
     public const int Loading = 5;
     public const int ToGame = 6;
+    public const int Replay = 7;
 
 }
 

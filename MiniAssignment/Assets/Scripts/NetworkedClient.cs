@@ -181,7 +181,7 @@ public class NetworkedClient : MonoBehaviour
         }
 
         // Match
-        if (signifier == ServerToClientSignifiers.MatchResponse)
+        else if (signifier == ServerToClientSignifiers.MatchResponse)
         {
             int MatchSignifier = int.Parse(csv[1]);
             
@@ -227,7 +227,7 @@ public class NetworkedClient : MonoBehaviour
 
             else if (MatchSignifier == GameSignifiers.SendingReplay)
             {
-                replay.AddLast(int.Parse(csv[2]));
+                Debug.Log(csv[2]);
             }
 
             else if (MatchSignifier == GameSignifiers.ReplaySavedSuccessfully)
@@ -244,6 +244,16 @@ public class NetworkedClient : MonoBehaviour
             
 
 
+        }
+
+        else if (signifier == ServerToClientSignifiers.ReplayResponse)
+        {
+            int ReplaySignifier = int.Parse(csv[1]);
+
+            if (ReplaySignifier == ReplaySignifiers.SendingFiles)
+            {
+                FindObjectOfType<FileManager>().AddFileToDisplay(csv[2]);
+            }
         }
 
 
