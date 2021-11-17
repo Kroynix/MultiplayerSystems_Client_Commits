@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Board : MonoBehaviour
 {
@@ -37,6 +38,9 @@ public class Board : MonoBehaviour
     // Game Objects - Buttons
     GameObject resetGame, requestReplay;
 
+    // Game Objects - Replay
+    GameObject InputReplayName, ConfirmationBox;
+
 
     // Start is called before the first frame update
     void Start()
@@ -44,8 +48,6 @@ public class Board : MonoBehaviour
         boxes = FindObjectsOfType<Box>();
         cam = Camera.main;
         replayMark = Mark.O;
-        //lineRenderer = GetComponent<LineRenderer> ();
-        //lineRenderer.enabled = false;
         marks = new Mark[9];
         canPlay = true;
 
@@ -66,13 +68,32 @@ public class Board : MonoBehaviour
                 resetGame = go;
             else if (go.name == "RequestReplay")
                 requestReplay = go;
-
+            else if (go.name == "InputNameField")
+                InputReplayName = go;
+            else if (go.name == "ConfirmationButton")
+                ConfirmationBox = go;
 
         }
-
-
-
     }
+
+
+    public void ConfirmationBoxPressed()
+    {
+        if (InputReplayName.GetComponent<InputField>().text != "")
+        {
+            FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.SaveReplay + "," + InputReplayName.GetComponent<InputField>().text);
+        }
+    }
+
+
+    public void RequestReplayPressed()
+    {
+        InputReplayName.SetActive(true);
+        ConfirmationBox.SetActive(true);
+        resetGame.SetActive(false);
+        requestReplay.SetActive(false);
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -159,7 +180,13 @@ public class Board : MonoBehaviour
         owin.SetActive(false);
         resetGame.SetActive(false);
         requestReplay.SetActive(false);
+        InputReplayName.SetActive(false);
+        ConfirmationBox.SetActive(false);
     }
+
+
+
+
 
 
     private void displayTie()

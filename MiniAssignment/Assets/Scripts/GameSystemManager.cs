@@ -184,10 +184,6 @@ public class GameSystemManager : MonoBehaviour
         networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.ResetGame);
     }
 
-    public void RequestReplayButtonPressed()
-    {
-        networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.RequestingReplay);
-    }
 
     public void QuitGameButtonPressed()
     {
@@ -267,8 +263,9 @@ public static class GameSignifiers
     public const int ResetGame = 6;
     public const int LookUpRoom = 7;
     public const int SendingReplay = 8;
-    public const int RequestingReplay = 9;
+    public const int SaveReplay = 9;
     public const int QuitGame = 10;
+    public const int ReplaySavedSuccessfully = 11;
 }
 
 

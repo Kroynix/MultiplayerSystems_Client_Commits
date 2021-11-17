@@ -183,12 +183,14 @@ public class NetworkedClient : MonoBehaviour
         // Match
         if (signifier == ServerToClientSignifiers.MatchResponse)
         {
-                
             int MatchSignifier = int.Parse(csv[1]);
+            
             if (MatchSignifier == GameSignifiers.AddToGameSession)
             {
                 int turnOrder = int.Parse(csv[2]);
                 gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.ToGame);
+                FindObjectOfType<Board>().RestartGame();
+
 
                 if (turnOrder == 1)
                     FindObjectOfType<Board>().canPlay = true;
@@ -226,6 +228,11 @@ public class NetworkedClient : MonoBehaviour
             else if (MatchSignifier == GameSignifiers.SendingReplay)
             {
                 replay.AddLast(int.Parse(csv[2]));
+            }
+
+            else if (MatchSignifier == GameSignifiers.ReplaySavedSuccessfully)
+            {
+                FindObjectOfType<AudioController>().Play("Success");
             }
 
             else if (MatchSignifier == GameSignifiers.QuitGame)
