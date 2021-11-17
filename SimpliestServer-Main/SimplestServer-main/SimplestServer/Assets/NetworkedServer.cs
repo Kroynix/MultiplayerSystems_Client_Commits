@@ -18,6 +18,7 @@ public class NetworkedServer : MonoBehaviour
 
     List<int> idlist;
     LinkedList<PlayerAccount> playerAccounts;
+    LinkedList<string> ReplayFiles;
     List<GameSession> gameSessions;
     string playerAccountFilePath;
     string userRecordingFilePath;
@@ -42,6 +43,7 @@ public class NetworkedServer : MonoBehaviour
 
         // List of Player accounts and current connected ID's
         playerAccounts = new LinkedList<PlayerAccount>();
+        ReplayFiles = new LinkedList<string>();
         idlist = new List<int>();
         gameSessions = new List<GameSession>();
         
@@ -49,6 +51,14 @@ public class NetworkedServer : MonoBehaviour
 
         //We need to load our saved Player Accounts.
         LoadPlayerAccounts();
+
+
+        LinkedList<int> moveList = LoadReplayFile("TheReplayThingy.txt");
+        foreach(int move in moveList)
+        {
+            Debug.Log(move);
+        }
+
         
     }
 
@@ -242,13 +252,15 @@ public class NetworkedServer : MonoBehaviour
                 }
             }
 
-            else if (MatchSignifier == GameSignifiers.RequestingReplay)
+            else if (MatchSignifier == GameSignifiers.SaveReplay)
             {
+                string FileName = csv[2];
                 GameSession gs = FindGameSessionWithPlayerID(id);
+                SaveReplay(id, FileName);
                 foreach(int n in gs.playerMoves)
                 {
                     // Send move back only to requesting ID.
-                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.SendingReplay + "," + n, id);
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ReplaySavedSuccessfully, id);
                 }
             }
 
@@ -297,11 +309,42 @@ public class NetworkedServer : MonoBehaviour
 
             while((line = sr.ReadLine()) != null)
             {
-              string[] csv = line.Split(',');
-             PlayerAccount pa = new PlayerAccount(csv[0],csv[1]);
-             playerAccounts.AddLast(pa);
+                string[] csv = line.Split(',');
+                PlayerAccount pa = new PlayerAccount(csv[0],csv[1]);
+                playerAccounts.AddLast(pa);
             }
         }
+    }
+
+    private void LoadAllReplays()
+    {
+        string [] files = System.IO.Directory.GetFiles(userRecordingFilePath);
+        foreach (string file in files)
+        {
+            string pos = file.Remove(0,127);
+            if(!pos.Contains(".meta"))
+                ReplayFiles.AddLast(pos);
+            
+        }
+        
+    }
+    
+
+    private LinkedList<int> LoadReplayFile(string fileName)
+    {
+        LinkedList<int> moveList = new LinkedList<int>();
+        if(File.Exists(userRecordingFilePath + fileName))
+        {
+            StreamReader sr = new StreamReader(userRecordingFilePath + fileName);
+            string line;
+
+            while((line = sr.ReadLine()) != null)
+            {
+                moveList.AddLast(int.Parse(line));
+            }
+            return moveList;
+        }
+        return null;
     }
 
 
@@ -315,6 +358,42 @@ public class NetworkedServer : MonoBehaviour
         return null;
     }
 
+    private void SaveReplay(int id, string FileName)
+    {
+        GameSession gs = FindGameSessionWithPlayerID(id);
+
+            if (gs != null)
+                using (StreamWriter sw = File.AppendText(userRecordingFilePath + FileName + ".txt"))
+                {
+                    foreach(int move in gs.playerMoves)
+                    {
+                        sw.WriteLine(move);
+                    }
+                    sw.Close();
+                }
+    }
+
+    
+
+
+/*
+
+    private LinkedList<int> LoadReplayFile(string fileName);
+    {
+        LinkedList<int> moveList = new LinkedList<int>();
+        if(File.Exists(userRecordingFilePath + fileName))
+        {
+            StreamReader sr = new StreamReader(userRecordingFilePath + fileName);
+            string line;
+
+            while((line = sr.ReadLine()) != null)
+            {
+                Debug.Log(line);
+            }
+        }
+    }
+    */
+    
 }
 
 public class GameSession
@@ -389,8 +468,9 @@ public static class GameSignifiers
     public const int ResetGame = 6;
     public const int LookUpRoom = 7;
     public const int SendingReplay = 8;
-    public const int RequestingReplay = 9;
+    public const int SaveReplay = 9;
     public const int QuitGame = 10;
+    public const int ReplaySavedSuccessfully = 11;
 }
 
 
