@@ -53,12 +53,6 @@ public class NetworkedServer : MonoBehaviour
         LoadPlayerAccounts();
 
 
-        LinkedList<int> moveList = LoadReplayFile("TheReplayThingy.txt");
-        foreach(int move in moveList)
-        {
-            Debug.Log(move);
-        }
-
         
     }
 
@@ -257,11 +251,8 @@ public class NetworkedServer : MonoBehaviour
                 string FileName = csv[2];
                 GameSession gs = FindGameSessionWithPlayerID(id);
                 SaveReplay(id, FileName);
-                foreach(int n in gs.playerMoves)
-                {
-                    // Send move back only to requesting ID.
-                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ReplaySavedSuccessfully, id);
-                }
+                SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ReplaySavedSuccessfully, id);
+                
             }
 
 
@@ -271,7 +262,9 @@ public class NetworkedServer : MonoBehaviour
 
                 if(gs != null)
                 {
+                    if(gs.playerID1 == id)
                         SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, gs.playerID2);
+                    else
                         SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, gs.playerID1);
                 }
             }
@@ -279,11 +272,33 @@ public class NetworkedServer : MonoBehaviour
 
 
         }
+
+        else if (signifier == ClientToServerSignifiers.Replay)
+        {
+            int ReplaySignifier = int.Parse(csv[1]);
+
+            if(ReplaySignifier == ReplaySignifiers.RequestingReplay)
+            {
+
+                LinkedList<int> moveList = LoadReplayFile(csv[2]);
+                StartCoroutine(SendReplayDelay(moveList,id));
+            }
+
+            else if (ReplaySignifier == ReplaySignifiers.StartingReplay)
+            {
+                LoadAllReplays();
+                foreach(string file in ReplayFiles)
+                {
+                    SendMessageToClient(ServerToClientSignifiers.ReplayResponse + "," + ReplaySignifiers.SendingFiles + "," + file, id);
+                }
+            }
+        }
         
+
 
     }
 
-
+    #region PlayerAccountHandling
     private void SavePlayerAccounts()
     {
         //StreamWriter sw = new StreamWriter(playerAccountFilePath);
@@ -297,7 +312,6 @@ public class NetworkedServer : MonoBehaviour
         }
         
     }
-
 
     private void LoadPlayerAccounts()
     {
@@ -315,9 +329,14 @@ public class NetworkedServer : MonoBehaviour
             }
         }
     }
+    #endregion PlayerAccountHandling
 
+
+
+    #region ReplayHandling
     private void LoadAllReplays()
     {
+        ReplayFiles.Clear();
         string [] files = System.IO.Directory.GetFiles(userRecordingFilePath);
         foreach (string file in files)
         {
@@ -329,6 +348,21 @@ public class NetworkedServer : MonoBehaviour
         
     }
     
+    private void SaveReplay(int id, string FileName)
+    {
+        GameSession gs = FindGameSessionWithPlayerID(id);
+
+            if (gs != null)
+                using (StreamWriter sw = File.AppendText(userRecordingFilePath + FileName + ".txt"))
+                {
+                    foreach(int move in gs.playerMoves)
+                    {
+                        sw.WriteLine(move);
+                    }
+                    sw.Close();
+                }
+    }
+
 
     private LinkedList<int> LoadReplayFile(string fileName)
     {
@@ -347,6 +381,8 @@ public class NetworkedServer : MonoBehaviour
         return null;
     }
 
+    #endregion ReplayHandling
+
 
     private GameSession FindGameSessionWithPlayerID(int id)
     {
@@ -358,43 +394,24 @@ public class NetworkedServer : MonoBehaviour
         return null;
     }
 
-    private void SaveReplay(int id, string FileName)
+
+    IEnumerator SendReplayDelay(LinkedList<int> moves, int identifier)
     {
-        GameSession gs = FindGameSessionWithPlayerID(id);
-
-            if (gs != null)
-                using (StreamWriter sw = File.AppendText(userRecordingFilePath + FileName + ".txt"))
-                {
-                    foreach(int move in gs.playerMoves)
-                    {
-                        sw.WriteLine(move);
-                    }
-                    sw.Close();
-                }
-    }
-
-    
-
-
-/*
-
-    private LinkedList<int> LoadReplayFile(string fileName);
-    {
-        LinkedList<int> moveList = new LinkedList<int>();
-        if(File.Exists(userRecordingFilePath + fileName))
+        foreach(int move in moves)
         {
-            StreamReader sr = new StreamReader(userRecordingFilePath + fileName);
-            string line;
-
-            while((line = sr.ReadLine()) != null)
-            {
-                Debug.Log(line);
-            }
+            //SendMessageToClient(ServerToClientSignifiers.Replay + "," + GameSignifiers.SendingReplay + "," + move, identifier);
+            Debug.Log("The Move is: " + move);
+            yield return new WaitForSeconds(2);
         }
+       
     }
-    */
+    
     
 }
+
+
+
+
 
 public class GameSession
 {
@@ -446,7 +463,7 @@ public static class ClientToServerSignifiers
     public const int Login = 1;
     public const int CreateAccount = 2;
     public const int Match = 3;
-
+    public const int Replay = 5;
     
 }
 
@@ -454,8 +471,20 @@ public static class ServerToClientSignifiers
 {
     public const int LoginResponse = 1;
     public const int MatchResponse = 4;
+    public const int ReplayResponse = 6;
 
 }
+
+public static class ReplaySignifiers
+{
+    public const int RequestingReplay = 1;
+    public const int SendingReplay = 2;
+    public const int StartingReplay = 3;
+    public const int SendingFiles = 4;
+    public const int RequestingReplayFiles = 5;
+
+}
+
 
 
 public static class GameSignifiers
@@ -493,8 +522,6 @@ public static class LoginResponses{
     public const int AccountCreated = 5;
     public const int SendUsername = 6;
 }
-
-
 
 
 
