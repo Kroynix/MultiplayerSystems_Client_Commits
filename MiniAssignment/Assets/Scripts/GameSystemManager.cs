@@ -81,8 +81,10 @@ public class GameSystemManager : MonoBehaviour
 
     // Setting Error Messages for LoginMenu off after getting reference
     ValueChanged();
-
     toggleCreate.GetComponent<Toggle>().onValueChanged.AddListener(toggleCreateValueChanged);
+
+
+    ChangeGameState(GameStates.Loading);
 
     }
 

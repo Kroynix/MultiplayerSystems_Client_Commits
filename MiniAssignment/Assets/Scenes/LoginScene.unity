@@ -138,7 +138,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &33313960
 RectTransform:
   m_ObjectHideFlags: 0
@@ -355,6 +355,10 @@ PrefabInstance:
     - target: {fileID: 2908980842058647967, guid: 44707966e64d0f2498ed2117decce5cf, type: 3}
       propertyPath: typingSpeed
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 2908980842058647967, guid: 44707966e64d0f2498ed2117decce5cf, type: 3}
+      propertyPath: animateTypingOnStart
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2908980842058647967, guid: 44707966e64d0f2498ed2117decce5cf, type: 3}
       propertyPath: m_FontData.m_MinSize
@@ -3141,7 +3145,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1029536014
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3268,6 +3272,10 @@ PrefabInstance:
       value: WELCOME
       objectReference: {fileID: 0}
     - target: {fileID: 2908980842058647967, guid: 44707966e64d0f2498ed2117decce5cf, type: 3}
+      propertyPath: animateTypingOnStart
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2908980842058647967, guid: 44707966e64d0f2498ed2117decce5cf, type: 3}
       propertyPath: m_FontData.m_MinSize
       value: 3
       objectReference: {fileID: 0}
@@ -3302,7 +3310,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1379555539, guid: 0c517fd498bfaef489b1a6fa9141f5d2, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1954210958, guid: 0c517fd498bfaef489b1a6fa9141f5d2, type: 3}
       propertyPath: m_Name

@@ -23,6 +23,7 @@ public class NetworkedClient : MonoBehaviour
     //List<IDName> idlist;
 
     GameObject gameSystemManager;
+    GameObject Board;
 
 
     // Start is called before the first frame update
@@ -31,12 +32,17 @@ public class NetworkedClient : MonoBehaviour
         //idlist = new List<IDName>();
 
         replay = new LinkedList<int>();
-        GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+        GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
 
         foreach (GameObject go in allObjects)
         {
             if (go.name == "GameManager")
                 gameSystemManager = go;
+
+            else if (go.name == "Board")
+                Board = go;
+
+            
 
         }
 
@@ -46,7 +52,6 @@ public class NetworkedClient : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
 
         UpdateNetworkConnection();
     }
@@ -183,26 +188,25 @@ public class NetworkedClient : MonoBehaviour
             {
                 int turnOrder = int.Parse(csv[2]);
                 gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.ToGame);
-                FindObjectOfType<Board>().RestartGame();
 
-
+                Board.GetComponent<Board>().RestartGame();
                 if (turnOrder == 1)
-                    FindObjectOfType<Board>().canPlay = true;
+                    Board.GetComponent<Board>().canPlay = true;
                 else if (turnOrder == 0)
-                    FindObjectOfType<Board>().canPlay = false;
+                    Board.GetComponent<Board>().canPlay = false;
 
             }
 
             else if (MatchSignifier == GameSignifiers.SendMoveToClients)
             {
                 int move = int.Parse(csv[2]);
-                FindObjectOfType<Board>().HitBox(FindObjectOfType<Board>().FindBox(move), Mark.X);
-                FindObjectOfType<Board>().canPlay = true;
+                Board.GetComponent<Board>().HitBox(Board.GetComponent<Board>().FindBox(move), Mark.X);
+                Board.GetComponent<Board>().canPlay = true;
             }
 
             else if (MatchSignifier == GameSignifiers.EndGame)
             {
-                FindObjectOfType<Board>().RemoteEndGame();
+                Board.GetComponent<Board>().RemoteEndGame();
             }
 
             else if (MatchSignifier == GameSignifiers.ResetGame)
@@ -210,13 +214,13 @@ public class NetworkedClient : MonoBehaviour
                 int turnOrder = int.Parse(csv[2]);
 
                 if (turnOrder == 1)
-                    FindObjectOfType<Board>().canPlay = true;
+                    Board.GetComponent<Board>().canPlay = true;
                 else if (turnOrder == 0)
-                    FindObjectOfType<Board>().canPlay = false;
+                    Board.GetComponent<Board>().canPlay = false;
 
 
                 replay.Clear();
-                FindObjectOfType<Board>().RestartGame();
+                Board.GetComponent<Board>().RestartGame();
             }
 
             else if (MatchSignifier == GameSignifiers.ReplaySavedSuccessfully)
@@ -227,7 +231,7 @@ public class NetworkedClient : MonoBehaviour
             else if (MatchSignifier == GameSignifiers.QuitGame)
             {
                 replay.Clear();
-                FindObjectOfType<Board>().RestartGame();
+                Board.GetComponent<Board>().RestartGame();
                 gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.MainMenu);
             }
             
@@ -252,7 +256,7 @@ public class NetworkedClient : MonoBehaviour
             else if (ReplaySignifier == ReplaySignifiers.SendingReplay)
             {
                 int move = int.Parse(csv[2]);
-                FindObjectOfType<Board>().Replaying(FindObjectOfType<Board>().FindBox(move));
+                Board.GetComponent<Board>().Replaying(Board.GetComponent<Board>().FindBox(move));
             }
         }
 

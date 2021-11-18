@@ -45,7 +45,7 @@ public class Board : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        boxes = FindObjectsOfType<Box>();
+        boxes = Resources.FindObjectsOfTypeAll<Box>();
         cam = Camera.main;
         replayMark = Mark.O;
         marks = new Mark[9];
