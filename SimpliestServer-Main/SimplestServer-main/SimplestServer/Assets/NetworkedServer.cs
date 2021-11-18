@@ -271,6 +271,8 @@ public class NetworkedServer : MonoBehaviour
 
             else if (MatchSignifier == GameSignifiers.QuitGame)
             {
+
+                // Players Quitting
                 GameSession gs = FindGameSessionWithPlayerID(id);
 
                 if(gs != null)
@@ -287,6 +289,14 @@ public class NetworkedServer : MonoBehaviour
 
 
                     gameSessions.Remove(gs);
+                }
+
+                // Observer Quit, Remove from Observer Queue
+                GameSession ObservGS = FindObserverWithID(id);
+                if(ObservGS != null)
+                {
+                    ObservGS.observers.Remove(id);
+                    SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, id);
                 }
             }
 
@@ -472,6 +482,19 @@ public class NetworkedServer : MonoBehaviour
         return null;
     }
 
+
+    private GameSession FindObserverWithID(int id)
+    {
+        foreach(GameSession gs in gameSessions)
+        {
+            foreach(int observer in gs.observers)
+            {
+                if(id == observer)
+                    return gs;
+            }
+        }
+        return null;     
+    }
 
 
     
