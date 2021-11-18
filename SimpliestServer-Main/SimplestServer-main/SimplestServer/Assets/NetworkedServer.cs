@@ -20,6 +20,9 @@ public class NetworkedServer : MonoBehaviour
     LinkedList<PlayerAccount> playerAccounts;
     LinkedList<string> ReplayFiles;
     List<GameSession> gameSessions;
+
+
+
     string playerAccountFilePath;
     string userRecordingFilePath;
     int playerWaitingForMatch = -1;
@@ -219,6 +222,12 @@ public class NetworkedServer : MonoBehaviour
                         SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.SendMoveToClients + "," + move, gs.playerID2);
                     else
                         SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.SendMoveToClients + "," + move, gs.playerID1);
+
+                    foreach(int observer in gs.observers)
+                    {
+                        SendMessageToClient(ServerToClientSignifiers.ReplayResponse + "," + ReplaySignifiers.SendingReplay + "," + move, observer);
+                    }
+                    
                 }
             }
 
@@ -243,6 +252,11 @@ public class NetworkedServer : MonoBehaviour
                     SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ResetGame + "," + 0, gs.playerID1);
                     SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ResetGame + "," + 1, gs.playerID2);
 
+
+                    foreach(int observer in gs.observers)
+                    {
+                        SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.ResetGame + "," + 0, observer);
+                    }
                 }
             }
 
@@ -266,6 +280,12 @@ public class NetworkedServer : MonoBehaviour
                     else
                         SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, gs.playerID1);
 
+                    foreach(int observer in gs.observers)
+                    {
+                        SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, observer);
+                    }
+
+
                     gameSessions.Remove(gs);
                 }
             }
@@ -284,7 +304,7 @@ public class NetworkedServer : MonoBehaviour
                 LinkedList<int> moveList = LoadReplayFile(csv[2]);
                 if(moveList != null)
                 {
-                    StartCoroutine(SendReplayDelay(moveList,id));
+                    StartCoroutine(SendReplayDelay(moveList,id, 1));
                 }
                 else
                 {
@@ -302,6 +322,42 @@ public class NetworkedServer : MonoBehaviour
             }
 
         }
+
+        else if (signifier == ClientToServerSignifiers.GameSession)
+        {
+            int GameSessionSignifier = int.Parse(csv[1]);
+
+            if(GameSessionSignifier == GameSessionSignifiers.RequestSessionList)
+            {
+                foreach(GameSession gs in gameSessions)
+                    SendMessageToClient(ServerToClientSignifiers.GameSessionResponse + "," + GameSessionSignifiers.SendingSessionList + "," + gs.playerID1, id);
+            }
+
+            else if (GameSessionSignifier == GameSessionSignifiers.RequestJoin)
+            {
+                int SessionID = int.Parse(csv[2]);
+
+                GameSession gs = FindGameSessionWithPlayerID(SessionID);
+
+                if(gs != null)
+                {
+                    gs.observers.Add(id);
+                    SendMessageToClient(ServerToClientSignifiers.GameSessionResponse + "," + GameSessionSignifiers.JoinApproved, id);
+                    StartCoroutine(SendReplayDelay(gs.playerMoves,id,0));
+
+                }
+                else
+                {
+                    SendMessageToClient(ServerToClientSignifiers.GameSessionResponse + "," + GameSessionSignifiers.JoinDenied, id);
+                }
+
+                    
+
+
+            }
+        }
+
+
         
 
 
@@ -390,7 +446,20 @@ public class NetworkedServer : MonoBehaviour
         return null;
     }
 
+
+
+    IEnumerator SendReplayDelay(LinkedList<int> moves, int identifier, int time)
+    {
+        foreach(int move in moves)
+        {
+            SendMessageToClient(ServerToClientSignifiers.ReplayResponse + "," + ReplaySignifiers.SendingReplay + "," + move, identifier);
+            yield return new WaitForSeconds(time);
+        }
+       
+    }
+
     #endregion ReplayHandling
+
 
 
     private GameSession FindGameSessionWithPlayerID(int id)
@@ -404,15 +473,7 @@ public class NetworkedServer : MonoBehaviour
     }
 
 
-    IEnumerator SendReplayDelay(LinkedList<int> moves, int identifier)
-    {
-        foreach(int move in moves)
-        {
-            SendMessageToClient(ServerToClientSignifiers.ReplayResponse + "," + ReplaySignifiers.SendingReplay + "," + move, identifier);
-            yield return new WaitForSeconds(1);
-        }
-       
-    }
+
     
     
 }
@@ -438,20 +499,6 @@ public class GameSession
 }
 
 
-public class IDName
-{
-    public int id;
-    public string name;
-
-    public IDName(int identifitier, string Name)
-    {
-        id = identifitier;
-        name = Name;
-    }
-
-}
-
-
 
 public class PlayerAccount
 {
@@ -471,17 +518,30 @@ public static class ClientToServerSignifiers
     public const int Login = 1;
     public const int CreateAccount = 2;
     public const int Match = 3;
-    public const int Replay = 5;
+    public const int Replay = 4;
+    public const int GameSession = 5;
     
 }
 
 public static class ServerToClientSignifiers
 {
     public const int LoginResponse = 1;
-    public const int MatchResponse = 4;
-    public const int ReplayResponse = 6;
+    public const int MatchResponse = 3;
+    public const int ReplayResponse = 4;
+    public const int GameSessionResponse = 5;
 
 }
+
+
+public static class GameSessionSignifiers
+{
+    public const int SendingSessionList = 1;
+    public const int RequestSessionList = 2;
+    public const int RequestJoin = 3;
+    public const int JoinApproved = 4;
+    public const int JoinDenied = 5;
+}
+
 
 public static class ReplaySignifiers
 {
