@@ -255,7 +255,6 @@ public class NetworkedServer : MonoBehaviour
                 
             }
 
-
             else if (MatchSignifier == GameSignifiers.QuitGame)
             {
                 GameSession gs = FindGameSessionWithPlayerID(id);
@@ -266,6 +265,8 @@ public class NetworkedServer : MonoBehaviour
                         SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, gs.playerID2);
                     else
                         SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, gs.playerID1);
+
+                    gameSessions.Remove(gs);
                 }
             }
 
@@ -281,7 +282,14 @@ public class NetworkedServer : MonoBehaviour
             {
 
                 LinkedList<int> moveList = LoadReplayFile(csv[2]);
-                StartCoroutine(SendReplayDelay(moveList,id));
+                if(moveList != null)
+                {
+                    StartCoroutine(SendReplayDelay(moveList,id));
+                }
+                else
+                {
+                    SendMessageToClient(ServerToClientSignifiers.ReplayResponse + "," + ReplaySignifiers.NullReplay, id);
+                }
             }
 
             else if (ReplaySignifier == ReplaySignifiers.StartingReplay)
@@ -292,6 +300,7 @@ public class NetworkedServer : MonoBehaviour
                     SendMessageToClient(ServerToClientSignifiers.ReplayResponse + "," + ReplaySignifiers.SendingFiles + "," + file, id);
                 }
             }
+
         }
         
 
@@ -399,9 +408,8 @@ public class NetworkedServer : MonoBehaviour
     {
         foreach(int move in moves)
         {
-            //SendMessageToClient(ServerToClientSignifiers.Replay + "," + GameSignifiers.SendingReplay + "," + move, identifier);
-            Debug.Log("The Move is: " + move);
-            yield return new WaitForSeconds(2);
+            SendMessageToClient(ServerToClientSignifiers.ReplayResponse + "," + ReplaySignifiers.SendingReplay + "," + move, identifier);
+            yield return new WaitForSeconds(1);
         }
        
     }
@@ -482,6 +490,7 @@ public static class ReplaySignifiers
     public const int StartingReplay = 3;
     public const int SendingFiles = 4;
     public const int RequestingReplayFiles = 5;
+    public const int NullReplay = 6;
 
 }
 
