@@ -225,11 +225,6 @@ public class NetworkedClient : MonoBehaviour
                 FindObjectOfType<Board>().RestartGame();
             }
 
-            else if (MatchSignifier == GameSignifiers.SendingReplay)
-            {
-                Debug.Log(csv[2]);
-            }
-
             else if (MatchSignifier == GameSignifiers.ReplaySavedSuccessfully)
             {
                 FindObjectOfType<AudioController>().Play("Success");
@@ -254,7 +249,20 @@ public class NetworkedClient : MonoBehaviour
             {
                 FindObjectOfType<FileManager>().AddFileToDisplay(csv[2]);
             }
+
+            else if (ReplaySignifier == ReplaySignifiers.NullReplay)
+            {
+                FindObjectOfType<AudioController>().Play("Error");
+            }
+
+            else if (ReplaySignifier == ReplaySignifiers.SendingReplay)
+            {
+                int move = int.Parse(csv[2]);
+                FindObjectOfType<Board>().Replaying(FindObjectOfType<Board>().FindBox(move));
+            }
         }
+
+
 
 
     }

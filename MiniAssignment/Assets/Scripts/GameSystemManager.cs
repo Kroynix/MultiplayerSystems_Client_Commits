@@ -208,12 +208,13 @@ public class GameSystemManager : MonoBehaviour
     public void QuitGameButtonPressed()
     {
         networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.QuitGame);
-        ChangeGameState(GameStates.WaitingForMatch);
+        ChangeGameState(GameStates.MainMenu);
     }
 
 
     public void ReplayButtonPressed()
     {
+        FindObjectOfType<FileManager>().ResetFileList());
         networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Replay + "," + ReplaySignifiers.StartingReplay);
         ChangeGameState(GameStates.Replay);
     }
@@ -290,7 +291,8 @@ public static class ReplaySignifiers
     public const int SendingReplay = 2;
     public const int StartingReplay = 3;
     public const int SendingFiles = 4;
-
+    public const int RequestingReplayFiles = 5;
+    public const int NullReplay = 6;
 
 }
 

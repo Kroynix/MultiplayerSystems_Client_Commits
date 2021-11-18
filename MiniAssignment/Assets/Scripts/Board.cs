@@ -119,7 +119,7 @@ public class Board : MonoBehaviour
     }
 
 
-    private void SwitchPlayer()
+    private void SwitchPlayMark()
     {
         replayMark = (replayMark == Mark.X) ? Mark.O : Mark.X;
     }
@@ -156,6 +156,36 @@ public class Board : MonoBehaviour
             }
         }
 
+    }
+
+
+
+    public void Replaying(Box box)
+    {
+        if(!box.isMarked)
+        {
+            marks[box.index] = replayMark;
+
+            box.SetMarked(GetSprite(replayMark), replayMark);
+            marksCount++;
+            // Check for winner
+            bool won = CheckIfWin(replayMark);
+            if(won)
+            {
+                FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.EndGame);
+                displayWinner(replayMark);
+                canPlay = false;
+                return;
+            }
+
+            if (marksCount == 9)
+            {
+                displayTie();
+                FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.Match + "," + GameSignifiers.EndGame);
+            }
+
+            SwitchPlayMark();
+        }
     }
 
 

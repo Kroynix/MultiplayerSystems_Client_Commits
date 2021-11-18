@@ -29,5 +29,9 @@ public class FileManager : MonoBehaviour
 
     }
 
+    public void ResetFileList()
+    {
+        FileDisplay.text = "";
+    }
 
 }
