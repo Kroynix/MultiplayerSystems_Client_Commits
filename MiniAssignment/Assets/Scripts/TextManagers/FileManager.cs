@@ -6,8 +6,10 @@ using TMPro;
 public class FileManager : MonoBehaviour
 {
 
+    // File Display
     public InputField FileSelection;
     public TMP_Text FileDisplay;
+
 
 
     // Update is called once per frame
@@ -33,5 +35,9 @@ public class FileManager : MonoBehaviour
     {
         FileDisplay.text = "";
     }
+
+
+
+
 
 }

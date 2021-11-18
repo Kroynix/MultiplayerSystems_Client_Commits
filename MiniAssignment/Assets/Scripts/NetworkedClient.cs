@@ -46,12 +46,6 @@ public class NetworkedClient : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            Debug.Log("Below is Replay");
-            foreach(int i in replay)
-                Debug.Log("Replay: " + i);
-        }
 
 
         UpdateNetworkConnection();
@@ -262,6 +256,26 @@ public class NetworkedClient : MonoBehaviour
             }
         }
 
+
+        else if (signifier == ServerToClientSignifiers.GameSessionResponse)
+        {
+            int GameSessionSignifier = int.Parse(csv[1]);
+
+            if(GameSessionSignifier == GameSessionSignifiers.SendingSessionList)
+            {
+                FindObjectOfType<GameSessionManager>().AddGameSessionToDisplay(csv[2]);
+            }
+            
+            else if (GameSessionSignifier == GameSessionSignifiers.JoinApproved)
+            {
+                gameSystemManager.GetComponent<GameSystemManager>().ChangeGameState(GameStates.ToGame);
+            }
+
+            else if (GameSessionSignifier == GameSessionSignifiers.JoinDenied)
+            {
+                FindObjectOfType<AudioController>().Play("Error");
+            }
+        }
 
 
 
